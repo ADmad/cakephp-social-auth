@@ -15,6 +15,7 @@ use Cake\Datasource\ModelAwareTrait;
 use Cake\Event\EventManagerTrait;
 use Cake\Http\Response;
 use Cake\Http\ServerRequest;
+use Cake\Network\Exception\BadRequestException;
 use Cake\Routing\Router;
 use RuntimeException;
 use SocialConnect\Auth\Service;
@@ -34,6 +35,7 @@ class SocialAuthMiddleware
      * @var array
      */
     protected $_defaultConfig = [
+        'requestMethod' => 'POST',
         'loginRedirect' => '/',
         'userEntity' => false,
         'userModel' => 'Users',
@@ -78,7 +80,10 @@ class SocialAuthMiddleware
      * @param \Cake\Http\Response $response The response.
      * @param callable $next Callback to invoke the next middleware.
      *
-     * @return \Psr\Http\Message\ResponseInterface A response
+     * @return \Psr\Http\Message\ResponseInterface A response.
+     *
+     * @throws \Cake\Network\Exception\BadRequestException If login action is
+     *  called with incorrect request method.
      */
     public function __invoke(ServerRequest $request, Response $response, $next)
     {
@@ -98,6 +103,10 @@ class SocialAuthMiddleware
         $providerName = $request->getParam('provider');
 
         if ($action === 'login') {
+            if ($request->getMethod() !== $config['requestMethod']) {
+                throw new BadRequestException();
+            }
+
             $provider = $this->_getService($request)->getProvider($providerName);
             $authUrl = $provider->makeAuthUrl();
 
