@@ -1,0 +1,10 @@
+{
+    "name": "admad/cakephp-social-auth",
+    "description": "A CakePHP plugin which allows you to authenticate using social providers like Facebook/Google/Twitter etc.",
+    "type": "cakephp-plugin",
+    "require": {
+        "cakephp/cakephp": "^3.4"
+    },
+    "license": "MIT",
+    "minimum-stability": "stable"
+}
