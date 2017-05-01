@@ -5,6 +5,11 @@
     "require": {
         "cakephp/cakephp": "^3.4"
     },
+    "autoload": {
+        "psr-4": {
+            "ADmad\\SocialAuth\\": "src"
+        }
+    },
     "license": "MIT",
     "minimum-stability": "stable",
     "extra": {
