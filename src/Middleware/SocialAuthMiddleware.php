@@ -156,8 +156,8 @@ class SocialAuthMiddleware
             ])
             ->first();
 
-        $finder = $this->config('finder');
         if ($profile) {
+            $finder = $this->config('finder');
             $userId = $profile->user_id;
             $user = $this->_userModel->get($userId);
             $user = $this->_userModel->find($finder)
