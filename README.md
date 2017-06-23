@@ -53,11 +53,11 @@ the plugin.
 Usage
 -----
 
-The plugin provides a `SocialAuthMiddleware` which handles authentication process.
+The plugin provides a `\ADmad\SocialAuth\Middleware\SocialAuthMiddleware` which handles authentication process.
 You can configure the middleware in your `Application::middleware()` method as shown:
 
 ```php
-$middleware->add(new SocialAuthMiddleware([
+$middleware->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
     // Request method type use to initiate authentication.
     'requestMethod' => 'POST',
     // URL string or array to redirect to after authentication.
