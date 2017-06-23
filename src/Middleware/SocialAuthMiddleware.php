@@ -176,12 +176,6 @@ class SocialAuthMiddleware
 
                 return false;
             }
-        } elseif ($identity->email) {
-            $user = $this->_userModel->find($finder)
-                ->where([
-                    $this->_userModel->aliasField($this->config('fields.email')) => $identity->email,
-                ])
-                ->first();
         }
 
         $profile = $this->_getProfileEntity($providerName, $identity, $accessToken, $profile ?: null);
