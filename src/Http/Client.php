@@ -15,12 +15,16 @@ use SocialConnect\Common\Http\Response;
 class Client extends SocialConnectClient
 {
     /**
+     * Http Client instance.
+     *
      * @var \Cake\Network\Http\Client
      */
     protected $_client;
 
     /**
-     * @param \Cake\Network\Http\Client $client
+     * Constructor.
+     *
+     * @param \Cake\Network\Http\Client $client Http Client instance.
      */
     public function __construct(HttpClient $client = null)
     {
@@ -30,11 +34,12 @@ class Client extends SocialConnectClient
     /**
      * Request specify url
      *
-     * @param string $url
-     * @param array $parameters
-     * @param string $method
-     * @param array $headers
-     * @param array $options
+     * @param string $url Request URL.
+     * @param array $parameters Request parameters.
+     * @param string $method Request method.
+     * @param array $headers Request headers.
+     * @param array $options Unused.
+     *
      * @return \SocialConnect\Common\Http\Response
      */
     public function request(

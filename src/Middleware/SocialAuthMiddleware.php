@@ -296,7 +296,7 @@ class SocialAuthMiddleware
     /**
      * Get social connect service instance.
      *
-     * @param \Cake\Http\ServerRequest $request
+     * @param \Cake\Http\ServerRequest $request Request instance.
      *
      * @return \SocialConnect\Auth\Service
      */
