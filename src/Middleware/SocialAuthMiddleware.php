@@ -46,7 +46,7 @@ class SocialAuthMiddleware
             'password' => 'password',
         ],
         'sessionKey' => 'Auth.User',
-        'newUserCallback' => 'newUser',
+        'getUserCallback' => 'getUser',
         'serviceConfig' => [],
     ];
 
@@ -184,7 +184,7 @@ class SocialAuthMiddleware
         }
 
         if (!$user) {
-            $user = $this->_newUser($profile);
+            $user = $this->_getUser($profile);
         }
         $profile->user_id = $user->id;
 
@@ -259,16 +259,16 @@ class SocialAuthMiddleware
     /**
      * Get new user entity.
      *
-     * It dispatches a `SocialConnect.newUser` event. A listener must return
+     * It dispatches a `SocialConnect.getUser` event. A listener must return
      * an entity for new user record.
      *
      * @param \Cake\Datasource\EntityInterface $profile Social profile entity.
      *
      * @return \Cake\Datasource\EntityInterface User entity.
      */
-    protected function _newUser(EntityInterface $profile)
+    protected function _getUser(EntityInterface $profile)
     {
-        $callbackMethod = $this->config('newUserCallback');
+        $callbackMethod = $this->config('getUserCallback');
 
         $user = call_user_func([$this->_userModel, $callbackMethod], $profile);
 
