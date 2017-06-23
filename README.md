@@ -40,15 +40,12 @@ Plugin::load('ADmad/SocialAuth', ['bootstrap' => true, 'routes' => true]);
 Database
 --------
 
-The plugin expects that you have a users table with at least `email` field
-and a `social_profiles` table. You can run
+This plugin requires a migration to generate a `social_profiles` table, and it
+can be generated via the official Migrations plugin as follows:
 
-```
+```shell
 bin/cake migrations migrate -p ADmad/SocialAuth
 ```
-
-to generate the `social_profiles` tabel using a migration file provided with
-the plugin.
 
 Usage
 -----
@@ -70,7 +67,6 @@ $middleware->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
     'finder' => 'all',
     // Fields.
     'fields' => [
-        'email' => 'email',
         'password' => 'password'
     ],
     // Session key to which to write identity record to.
