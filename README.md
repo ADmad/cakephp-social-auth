@@ -73,7 +73,7 @@ $middleware->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
     'sessionKey' => 'Auth.User',
     // The methods in user model which should be called in case of new user.
     // It should return a User entity.
-    'newUserCallback' => 'newUser',
+    'getUserCallback' => 'getUser',
     // SocialConnect Auth service's providers config. https://github.com/SocialConnect/auth/blob/master/README.md
     'serviceConfig' => [
         'provider' => [
@@ -111,14 +111,14 @@ still do so by configuring the middleware with `'requestMethod' => 'GET'`.
 
 Once a user is authenticated through the provider the authenticator gets the user
 profile from the identity provider and using that tries to find the corresponding
-user record using the user model. If no user is found it calls the `newUser` method
+user record using the user model. If no user is found it calls the `getUser` method
 of your user model. The method recieves social profile model entity as argument
 and return an entity for the new user. E.g.
 
 ```php
 // UsersTable.php
 
-public function newUser(EntityInterface $profile) {
+public function getUser(EntityInterface $profile) {
     // Make sure here that all the required fields are actually present
     if (empty($profile->email)) {
         throw new \RuntimeException('Could not find email in social profile.');
