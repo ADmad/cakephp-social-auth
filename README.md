@@ -122,7 +122,7 @@ and return an entity for the new user. E.g.
 ```php
 // UsersTable.php
 
-public function createUser(EntityInterface $profile) {
+public function newUser(EntityInterface $profile) {
     // Make sure here that all the required fields are actually present
     if (empty($profile->email)) {
         throw new \RuntimeException('Could not find email in social profile.');
