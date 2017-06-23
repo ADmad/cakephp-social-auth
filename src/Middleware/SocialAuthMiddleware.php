@@ -178,7 +178,7 @@ class SocialAuthMiddleware
         } elseif ($identity->email) {
             $user = $this->_userModel->find($finder)
                 ->where([
-                    $this->_userModel->aliasField($this->config('fields.password')) => $identity->email
+                    $this->_userModel->aliasField($this->config('fields.email')) => $identity->email
                 ])
                 ->first();
         }
