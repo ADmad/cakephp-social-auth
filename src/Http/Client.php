@@ -1,10 +1,11 @@
 <?php
 /**
- * ADmad\SocialAuth plugin
+ * ADmad\SocialAuth plugin.
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  */
+
 namespace ADmad\SocialAuth\Http;
 
 use Cake\Network\Http\Client as HttpClient;
@@ -32,7 +33,7 @@ class Client extends SocialConnectClient
     }
 
     /**
-     * Request specify url
+     * Request specify url.
      *
      * @param string $url Request URL.
      * @param array $parameters Request parameters.
