@@ -184,7 +184,7 @@ class SocialAuthMiddleware
         }
 
         if (!$user) {
-            $user = $this->_getUser($profile);
+            $user = $this->_getUserEntity($profile);
         }
         $profile->user_id = $user->id;
 
@@ -266,7 +266,7 @@ class SocialAuthMiddleware
      *
      * @return \Cake\Datasource\EntityInterface User entity.
      */
-    protected function _getUser(EntityInterface $profile)
+    protected function _getUserEntity(EntityInterface $profile)
     {
         $callbackMethod = $this->config('getUserCallback');
 
