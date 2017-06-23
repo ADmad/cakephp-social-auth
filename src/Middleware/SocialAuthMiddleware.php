@@ -1,10 +1,11 @@
 <?php
 /**
- * ADmad\SocialAuth plugin
+ * ADmad\SocialAuth plugin.
  *
  * Licensed under The MIT License
  * For full copyright and license information, please see the LICENSE.txt
  */
+
 namespace ADmad\SocialAuth\Middleware;
 
 use ADmad\SocialAuth\Http\Client;
@@ -42,7 +43,7 @@ class SocialAuthMiddleware
         'finder' => 'all',
         'fields' => [
             'email' => 'email',
-            'password' => 'password'
+            'password' => 'password',
         ],
         'sessionKey' => 'Auth.User',
         'newUserCallback' => 'newUser',
@@ -80,10 +81,10 @@ class SocialAuthMiddleware
      * @param \Cake\Http\Response $response The response.
      * @param callable $next Callback to invoke the next middleware.
      *
-     * @return \Psr\Http\Message\ResponseInterface A response.
-     *
      * @throws \Cake\Network\Exception\BadRequestException If login action is
      *  called with incorrect request method.
+     *
+     * @return \Psr\Http\Message\ResponseInterface A response.
      */
     public function __invoke(ServerRequest $request, Response $response, $next)
     {
@@ -151,7 +152,7 @@ class SocialAuthMiddleware
         $profile = $this->SocialProfiles->find()
             ->where([
                 $this->SocialProfiles->aliasField('provider') => $providerName,
-                $this->SocialProfiles->aliasField('identifier') => $identity->id
+                $this->SocialProfiles->aliasField('identifier') => $identity->id,
             ])
             ->first();
 
@@ -161,7 +162,7 @@ class SocialAuthMiddleware
             $user = $this->_userModel->get($userId);
             $user = $this->_userModel->find($finder)
                 ->where([
-                    $this->_userModel->aliasField($this->_userModel->primaryKey()) => $userId
+                    $this->_userModel->aliasField($this->_userModel->primaryKey()) => $userId,
                 ])
                 ->first();
 
@@ -178,7 +179,7 @@ class SocialAuthMiddleware
         } elseif ($identity->email) {
             $user = $this->_userModel->find($finder)
                 ->where([
-                    $this->_userModel->aliasField($this->config('fields.email')) => $identity->email
+                    $this->_userModel->aliasField($this->config('fields.email')) => $identity->email,
                 ])
                 ->first();
         }
@@ -201,7 +202,7 @@ class SocialAuthMiddleware
     }
 
     /**
-     * Get social profile entity
+     * Get social profile entity.
      *
      * @param string $providerName Provider name.
      * @param \SocialConnect\Common\Entity\User $identity Social connect entity.
@@ -223,7 +224,7 @@ class SocialAuthMiddleware
         }
 
         $data = [
-            'access_token' => $accessToken
+            'access_token' => $accessToken,
         ];
 
         foreach (get_object_vars($identity) as $key => $value) {
@@ -282,9 +283,9 @@ class SocialAuthMiddleware
      *
      * @param \Cake\Datasource\EntityInterface $profile Social profile entity.
      *
-     * @return void
-     *
      * @throws \RuntimeException Thrown when unable to save social profile.
+     *
+     * @return void
      */
     protected function _saveProfile(EntityInterface $profile)
     {
@@ -315,7 +316,7 @@ class SocialAuthMiddleware
         $serviceConfig['redirectUri'] = Router::url([
             'plugin' => 'ADmad/SocialAuth',
             'controller' => 'Auth',
-            'action' => 'callback'
+            'action' => 'callback',
         ], true);
 
         $request->session()->start();

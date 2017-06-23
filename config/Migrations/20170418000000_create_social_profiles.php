@@ -15,60 +15,60 @@ class CreateSocialProfiles extends AbstractMigration
             ->addColumn('provider', 'string', [
                 'default' => null,
                 'limit' => 255,
-                'null' => false
+                'null' => false,
             ])
             ->addColumn('access_token', 'text', [
                 'default' => null,
-                'null' => false
+                'null' => false,
             ])
             ->addColumn('identifier', 'string', [
                 'default' => null,
                 'limit' => 255,
-                'null' => false
+                'null' => false,
             ])
             ->addColumn('username', 'string', [
                 'default' => null,
                 'limit' => 255,
-                'null' => true
+                'null' => true,
             ])
             ->addColumn('first_name', 'string', [
                 'default' => null,
                 'limit' => 255,
-                'null' => true
+                'null' => true,
             ])
             ->addColumn('last_name', 'string', [
                 'default' => null,
                 'limit' => 255,
-                'null' => true
+                'null' => true,
             ])
             ->addColumn('full_name', 'string', [
                 'default' => null,
                 'limit' => 255,
-                'null' => true
+                'null' => true,
             ])
             ->addColumn('email', 'string', [
                 'default' => null,
                 'limit' => 255,
-                'null' => true
+                'null' => true,
             ])
             ->addColumn('birth_date', 'string', [
                 'default' => null,
                 'limit' => 255,
-                'null' => true
+                'null' => true,
             ])
             ->addColumn('picture', 'string', [
                 'default' => null,
                 'limit' => 255,
-                'null' => true
+                'null' => true,
             ])
             ->addColumn('gender', 'string', [
                 'default' => null,
                 'limit' => 255,
-                'null' => true
+                'null' => true,
             ])
             ->addColumn('email_verified', 'boolean', [
                 'default' => false,
-                'null' => false
+                'null' => false,
             ])
             ->addColumn('created', 'datetime', [
                 'default' => null,
