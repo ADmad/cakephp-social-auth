@@ -179,6 +179,9 @@ class SocialAuthMiddleware
         }
 
         $profile = $this->_getProfileEntity($providerName, $identity, $accessToken, $profile ?: null);
+        if ($profile->isDirty()) {
+            $this->_saveProfile($profile);
+        }
 
         if (!$user) {
             $user = $this->_newUser($profile);
