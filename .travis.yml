@@ -1,0 +1,13 @@
+language: php
+
+php:
+  - 7
+
+before_script:
+  - composer require cakephp/cakephp-codesniffer:^3.0
+
+script:
+  - vendor/bin/phpcs -n -p --extensions=php --standard=vendor/cakephp/cakephp-codesniffer/CakePHP src/
+
+notifications:
+  email: false
