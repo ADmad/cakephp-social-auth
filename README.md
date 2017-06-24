@@ -40,15 +40,12 @@ Plugin::load('ADmad/SocialAuth', ['bootstrap' => true, 'routes' => true]);
 Database
 --------
 
-The plugin expects that you have a users table with at least `email` field
-and a `social_profiles` table. You can run
+This plugin requires a migration to generate a `social_profiles` table, and it
+can be generated via the official Migrations plugin as follows:
 
-```
+```shell
 bin/cake migrations migrate -p ADmad/SocialAuth
 ```
-
-to generate the `social_profiles` tabel using a migration file provided with
-the plugin.
 
 Usage
 -----
@@ -70,14 +67,13 @@ $middleware->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
     'finder' => 'all',
     // Fields.
     'fields' => [
-        'email' => 'email',
         'password' => 'password'
     ],
     // Session key to which to write identity record to.
     'sessionKey' => 'Auth.User',
     // The methods in user model which should be called in case of new user.
     // It should return a User entity.
-    'newUserCallback' => 'newUser',
+    'getUserCallback' => 'getUser',
     // SocialConnect Auth service's providers config. https://github.com/SocialConnect/auth/blob/master/README.md
     'serviceConfig' => [
         'provider' => [
@@ -115,14 +111,14 @@ still do so by configuring the middleware with `'requestMethod' => 'GET'`.
 
 Once a user is authenticated through the provider the authenticator gets the user
 profile from the identity provider and using that tries to find the corresponding
-user record using the user model. If no user is found it calls the `newUser` method
+user record using the user model. If no user is found it calls the `getUser` method
 of your user model. The method recieves social profile model entity as argument
 and return an entity for the new user. E.g.
 
 ```php
 // UsersTable.php
 
-public function newUser(EntityInterface $profile) {
+public function getUser(EntityInterface $profile) {
     // Make sure here that all the required fields are actually present
     if (empty($profile->email)) {
         throw new \RuntimeException('Could not find email in social profile.');

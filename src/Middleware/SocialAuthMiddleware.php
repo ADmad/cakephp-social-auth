@@ -46,7 +46,7 @@ class SocialAuthMiddleware
             'password' => 'password',
         ],
         'sessionKey' => 'Auth.User',
-        'newUserCallback' => 'newUser',
+        'getUserCallback' => 'getUser',
         'serviceConfig' => [],
     ];
 
@@ -156,8 +156,8 @@ class SocialAuthMiddleware
             ])
             ->first();
 
-        $finder = $this->config('finder');
         if ($profile) {
+            $finder = $this->config('finder');
             $userId = $profile->user_id;
             $user = $this->_userModel->get($userId);
             $user = $this->_userModel->find($finder)
@@ -176,18 +176,15 @@ class SocialAuthMiddleware
 
                 return false;
             }
-        } elseif ($identity->email) {
-            $user = $this->_userModel->find($finder)
-                ->where([
-                    $this->_userModel->aliasField($this->config('fields.email')) => $identity->email,
-                ])
-                ->first();
         }
 
         $profile = $this->_getProfileEntity($providerName, $identity, $accessToken, $profile ?: null);
+        if ($profile->isDirty()) {
+            $this->_saveProfile($profile);
+        }
 
         if (!$user) {
-            $user = $this->_newUser($profile);
+            $user = $this->_getUserEntity($profile);
         }
         $profile->user_id = $user->id;
 
@@ -262,16 +259,16 @@ class SocialAuthMiddleware
     /**
      * Get new user entity.
      *
-     * It dispatches a `SocialConnect.newUser` event. A listener must return
+     * It dispatches a `SocialConnect.getUser` event. A listener must return
      * an entity for new user record.
      *
      * @param \Cake\Datasource\EntityInterface $profile Social profile entity.
      *
      * @return \Cake\Datasource\EntityInterface User entity.
      */
-    protected function _newUser(EntityInterface $profile)
+    protected function _getUserEntity(EntityInterface $profile)
     {
-        $callbackMethod = $this->config('newUserCallback');
+        $callbackMethod = $this->config('getUserCallback');
 
         $user = call_user_func([$this->_userModel, $callbackMethod], $profile);
 
