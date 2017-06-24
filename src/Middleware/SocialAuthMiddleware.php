@@ -42,7 +42,6 @@ class SocialAuthMiddleware
         'userModel' => 'Users',
         'finder' => 'all',
         'fields' => [
-            'email' => 'email',
             'password' => 'password',
         ],
         'sessionKey' => 'Auth.User',
@@ -149,6 +148,7 @@ class SocialAuthMiddleware
         $identity = $provider->getIdentity($accessToken);
 
         $user = null;
+
         $profile = $this->SocialProfiles->find()
             ->where([
                 $this->SocialProfiles->aliasField('provider') => $providerName,
@@ -156,44 +156,42 @@ class SocialAuthMiddleware
             ])
             ->first();
 
-        if ($profile) {
-            $finder = $this->config('finder');
-            $userId = $profile->user_id;
-            $user = $this->_userModel->get($userId);
-            $user = $this->_userModel->find($finder)
-                ->where([
-                    $this->_userModel->aliasField($this->_userModel->primaryKey()) => $userId,
-                ])
-                ->first();
-
-            // User record exists but finder conditions did not match,
-            // so just update social profile record and return false.
-            if (!$user) {
-                $profile = $this->_getProfileEntity($providerName, $identity, $accessToken, $profile);
-                if ($profile->isDirty()) {
-                    $this->_saveProfile($profile);
-                }
-
-                return false;
-            }
-        }
-
-        $profile = $this->_getProfileEntity($providerName, $identity, $accessToken, $profile ?: null);
+        $profile = $this->_patchProfile(
+            $providerName,
+            $identity,
+            $accessToken,
+            $profile ?: null
+        );
         if ($profile->isDirty()) {
             $this->_saveProfile($profile);
         }
 
-        if (!$user) {
-            $user = $this->_getUserEntity($profile);
+        if ($profile->user_id) {
+            $userPkField = $this->_userModel->aliasField($this->_userModel->primaryKey());
+
+            $user = $this->_userModel->find()
+                ->where([
+                    $userPkField => $profile->user_id,
+                ])
+                ->find($this->config('finder'))
+                ->first();
         }
-        $profile->user_id = $user->id;
+
+        if (!$user) {
+            if ($profile->user_id) {
+                return false;
+            }
+
+            $user = $this->_getUserEntity($profile);
+            $profile->user_id = $user->id;
+        }
 
         if ($profile->isDirty()) {
             $this->_saveProfile($profile);
         }
 
         $user->set('social_profile', $profile);
-        $user->unsetProperty('password');
+        $user->unsetProperty($this->config('fields.password'));
 
         return $user;
     }
@@ -208,7 +206,7 @@ class SocialAuthMiddleware
      *
      * @return \Cake\Datasource\EntityInterface
      */
-    protected function _getProfileEntity(
+    protected function _patchProfile(
         $providerName,
         SocialConnectUser $identity,
         AccessTokenInterface $accessToken,
