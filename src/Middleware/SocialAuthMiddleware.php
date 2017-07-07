@@ -80,16 +80,13 @@ class SocialAuthMiddleware
     }
 
     /**
-     * Serve assets if the path matches one.
+     * Handle authentication.
      *
      * @param \Cake\Http\ServerRequest $request The request.
      * @param \Cake\Http\Response $response The response.
      * @param callable $next Callback to invoke the next middleware.
      *
-     * @throws \Cake\Network\Exception\BadRequestException If login action is
-     *  called with incorrect request method.
-     *
-     * @return \Psr\Http\Message\ResponseInterface A response.
+     * @return \Cake\Http\Response A response.
      */
     public function __invoke(ServerRequest $request, Response $response, $next)
     {
@@ -102,21 +99,50 @@ class SocialAuthMiddleware
             return $next($request, $response);
         }
 
-        $config = $this->config();
+        $method = '_handle' . ucfirst($action) . 'Action';
+
+        return $this->{$method}($request, $response);
+    }
+
+    /**
+     * Handle login action, initiate authentication process.
+     *
+     * @param \Cake\Http\ServerRequest $request The request.
+     * @param \Cake\Http\Response $response The response.
+     *
+     * @throws \Cake\Network\Exception\BadRequestException If login action is
+     *  called with incorrect request method.
+     *
+     * @return \Cake\Http\Response A response.
+     */
+    protected function _handleLoginAction(ServerRequest $request, Response $response)
+    {
         $providerName = $request->getParam('provider');
 
-        if ($action === 'login') {
-            if ($request->getMethod() !== $config['requestMethod']) {
-                throw new BadRequestException();
-            }
-
-            $provider = $this->_getService($request)->getProvider($providerName);
-            $authUrl = $provider->makeAuthUrl();
-
-            $this->_setRedirectUrl($request);
-
-            return $response->withLocation($authUrl);
+        if ($request->getMethod() !== $this->getConfig('requestMethod')) {
+            throw new BadRequestException();
         }
+
+        $provider = $this->_getService($request)->getProvider($providerName);
+        $authUrl = $provider->makeAuthUrl();
+
+        $this->_setRedirectUrl($request);
+
+        return $response->withLocation($authUrl);
+    }
+
+    /**
+     * Handle callback action.
+     *
+     * @param \Cake\Http\ServerRequest $request The request.
+     * @param \Cake\Http\Response $response The response.
+     *
+     * @return \Cake\Http\Response A response.
+     */
+    protected function _handleCallbackAction(ServerRequest $request, Response $response)
+    {
+        $config = $this->getConfig();
+        $providerName = $request->getParam('provider');
 
         $user = $this->_getUser($providerName, $request);
         $user->unsetProperty($config['fields']['password']);
