@@ -31,6 +31,12 @@ class SocialAuthMiddleware
     use ModelAwareTrait;
 
     /**
+     * The query string key used for remembering the referrered page when
+     * getting redirected to login.
+     */
+    const QUERY_STRING_REDIRECT = 'redirect';
+
+    /**
      * Default config.
      *
      * @var array
@@ -90,12 +96,9 @@ class SocialAuthMiddleware
         $action = $request->getParam('action');
 
         if ($request->getParam('plugin') !== 'ADmad/SocialAuth'
-            && $request->getParam('controller') !== 'Auth'
+            || $request->getParam('controller') !== 'Auth'
+            || !in_array($action, ['login', 'callback'], true)
         ) {
-            return $next($request, $response);
-        }
-
-        if (!in_array($action, ['login', 'callback'])) {
             return $next($request, $response);
         }
 
@@ -110,6 +113,8 @@ class SocialAuthMiddleware
             $provider = $this->_getService($request)->getProvider($providerName);
             $authUrl = $provider->makeAuthUrl();
 
+            $this->_setRedirectUrl($request);
+
             return $response->withLocation($authUrl);
         }
 
@@ -122,7 +127,9 @@ class SocialAuthMiddleware
 
         $request->session()->write($config['sessionKey'], $user);
 
-        return $response->withLocation(Router::url($config['loginRedirect']), true);
+        return $response->withLocation(
+            Router::url($this->_getRedirectUrl($request), true)
+        );
     }
 
     /**
@@ -323,5 +330,50 @@ class SocialAuthMiddleware
         );
 
         return $this->_service;
+    }
+
+    /**
+     * Save URL to redirect to after authentication to session.
+     *
+     * @param \Cake\Http\ServerRequest $request Request instance.
+     *
+     * @return void
+     */
+    protected function _setRedirectUrl(ServerRequest $request)
+    {
+        $request->session()->delete('SocialAuth.redirectUrl');
+
+        $queryParams = $request->getQueryParams();
+        if (empty($queryParams[static::QUERY_STRING_REDIRECT])) {
+            return;
+        }
+
+        $redirectUrl = $queryParams[static::QUERY_STRING_REDIRECT];
+        if (substr($redirectUrl, 0, 1) !== '/'
+            || substr($redirectUrl, 0, 2) === '//'
+        ) {
+            return;
+        }
+
+        $request->session()->write('SocialAuth.redirectUrl', $redirectUrl);
+    }
+
+    /**
+     * Get URL to redirect to after authentication.
+     *
+     * @param \Cake\Http\ServerRequest $request Request instance.
+     *
+     * @return string
+     */
+    protected function _getRedirectUrl(ServerRequest $request)
+    {
+        $redirectUrl = $request->session()->read('SocialAuth.redirectUrl');
+        if ($redirectUrl) {
+            $request->session()->delete('SocialAuth.redirectUrl');
+
+            return $redirectUrl;
+        }
+
+        return $this->getConfig('loginRedirect');
     }
 }
