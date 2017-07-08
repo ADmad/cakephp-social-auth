@@ -50,16 +50,19 @@ bin/cake migrations migrate -p ADmad/SocialAuth
 Usage
 -----
 
-The plugin provides a `\ADmad\SocialAuth\Middleware\SocialAuthMiddleware` which handles authentication process.
+The plugin provides a `\ADmad\SocialAuth\Middleware\SocialAuthMiddleware` which
+handles authentication process through social providers.
 You can configure the middleware in your `Application::middleware()` method as shown:
 
 ```php
+// src/Application.php
+
 $middleware->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
     // Request method type use to initiate authentication.
     'requestMethod' => 'POST',
     // URL string or array to redirect to after authentication.
     'loginRedirect' => '/',
-    // Boolean indicating user identity should be returned as entity.
+    // Boolean indicating whether user identity should be returned as entity.
     'userEntity' => false,
     // User model.
     'userModel' => 'Users',
@@ -99,7 +102,8 @@ echo $this->Form->postLink(
         'plugin' => 'ADmad/SocialAuth',
         'controller' => 'Auth',
         'action' => 'login',
-        'provider' => 'facebook'
+        'provider' => 'facebook',
+        '?' => ['redirect' => $this->request->getQuery('redirect')]
     ]
 );
 ```
@@ -116,7 +120,7 @@ of your user model. The method recieves social profile model entity as argument
 and return an entity for the new user. E.g.
 
 ```php
-// UsersTable.php
+// src/Model/Table/UsersTable.php
 
 public function getUser(EntityInterface $profile) {
     // Make sure here that all the required fields are actually present
