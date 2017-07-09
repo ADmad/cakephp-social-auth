@@ -17,6 +17,7 @@ use Cake\Event\EventManagerTrait;
 use Cake\Http\Response;
 use Cake\Http\ServerRequest;
 use Cake\Network\Exception\BadRequestException;
+use Cake\Network\Exception\UnauthorizedException;
 use Cake\Routing\Router;
 use RuntimeException;
 use SocialConnect\Auth\Service;
@@ -137,6 +138,8 @@ class SocialAuthMiddleware
      * @param \Cake\Http\ServerRequest $request The request.
      * @param \Cake\Http\Response $response The response.
      *
+     * @throws \Cake\Network\Exception\UnauthorizedException
+     *
      * @return \Cake\Http\Response A response.
      */
     protected function _handleCallbackAction(ServerRequest $request, Response $response)
@@ -144,7 +147,16 @@ class SocialAuthMiddleware
         $config = $this->getConfig();
         $providerName = $request->getParam('provider');
 
-        $user = $this->_getUser($providerName, $request);
+        try {
+            $user = $this->_getUser($providerName, $request);
+        } catch (\Exception $e) {
+            throw new UnauthorizedException();
+        }
+
+        if (!$user) {
+            throw new UnauthorizedException();
+        }
+
         $user->unsetProperty($config['fields']['password']);
 
         if (!$config['userEntity']) {
