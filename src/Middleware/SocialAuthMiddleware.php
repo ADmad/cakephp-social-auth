@@ -147,6 +147,7 @@ class SocialAuthMiddleware
         $config = $this->getConfig();
         $providerName = $request->getParam('provider');
 
+        $user = null;
         try {
             $user = $this->_getUser($providerName, $request);
         } catch (\Exception $e) {
@@ -176,8 +177,8 @@ class SocialAuthMiddleware
      * @param string $providerName Provider name.
      * @param \Cake\Http\ServerRequest $request Request instance.
      *
-     * @return array|\Cake\Database\EntityInterface|bool User array or entity
-     *   on success, false on failure.
+     * @return array|\Cake\Database\EntityInterface|null User array or entity
+     *   on success, null on failure.
      */
     protected function _getUser($providerName, ServerRequest $request)
     {
@@ -224,7 +225,7 @@ class SocialAuthMiddleware
 
         if (!$user) {
             if ($profile->user_id) {
-                return false;
+                return null;
             }
 
             $user = $this->_getUserEntity($profile);
