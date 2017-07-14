@@ -17,7 +17,6 @@ use Cake\Event\EventManagerTrait;
 use Cake\Http\Response;
 use Cake\Http\ServerRequest;
 use Cake\Network\Exception\BadRequestException;
-use Cake\Network\Exception\UnauthorizedException;
 use Cake\Routing\Router;
 use RuntimeException;
 use SocialConnect\Auth\Service;
@@ -44,6 +43,7 @@ class SocialAuthMiddleware
      */
     protected $_defaultConfig = [
         'requestMethod' => 'POST',
+        'loginUrl' => '/users/login',
         'loginRedirect' => '/',
         'userEntity' => false,
         'userModel' => 'Users',
@@ -69,6 +69,13 @@ class SocialAuthMiddleware
      * @var \Cake\Datasource\RepositoryInterface
      */
     protected $_userModel;
+
+    /**
+     * Error
+     *
+     * @var string
+     */
+    protected $_error;
 
     /**
      * Constructor.
@@ -138,8 +145,6 @@ class SocialAuthMiddleware
      * @param \Cake\Http\ServerRequest $request The request.
      * @param \Cake\Http\Response $response The response.
      *
-     * @throws \Cake\Network\Exception\UnauthorizedException
-     *
      * @return \Cake\Http\Response A response.
      */
     protected function _handleCallbackAction(ServerRequest $request, Response $response)
@@ -147,15 +152,16 @@ class SocialAuthMiddleware
         $config = $this->getConfig();
         $providerName = $request->getParam('provider');
 
-        $user = null;
-        try {
-            $user = $this->_getUser($providerName, $request);
-        } catch (\Exception $e) {
-            throw new UnauthorizedException();
-        }
-
+        $user = $this->_getUser($providerName, $request);
         if (!$user) {
-            throw new UnauthorizedException();
+            $redirectUrl = Router::url($config['loginUrl'], true);
+            if ($this->_error) {
+                $redirectUrl .= '?error=' . $this->_error;
+            }
+
+            return $response->withLocation(
+                $redirectUrl
+            );
         }
 
         $user->unsetProperty($config['fields']['password']);
@@ -189,9 +195,15 @@ class SocialAuthMiddleware
 
         $this->_userModel = $this->loadModel($userModel);
 
-        $provider = $this->_getService($request)->getProvider($providerName);
-        $accessToken = $provider->getAccessTokenByRequestParameters($request->getQueryParams());
-        $identity = $provider->getIdentity($accessToken);
+        try {
+            $provider = $this->_getService($request)->getProvider($providerName);
+            $accessToken = $provider->getAccessTokenByRequestParameters($request->getQueryParams());
+            $identity = $provider->getIdentity($accessToken);
+        } catch (\Exception $e) {
+            $this->_error = 'provider_failure';
+
+            return null;
+        }
 
         $user = null;
 
@@ -225,6 +237,8 @@ class SocialAuthMiddleware
 
         if (!$user) {
             if ($profile->user_id) {
+                $this->_error = 'finder_failure';
+
                 return null;
             }
 
