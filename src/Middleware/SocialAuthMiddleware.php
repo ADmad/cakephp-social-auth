@@ -39,6 +39,21 @@ class SocialAuthMiddleware
     /**
      * Default config.
      *
+     * ### Options
+     *
+     * - `requestMethod`: Request method type. Default "POST".
+     * - `loginUrl`: Login page URL. In case of auth failure user is redirected
+     *   to this login page with "error" query string var.
+     * - `userEntity`: Whether to return entity or array for user. Default `false`.
+     * - `userModel`: User model name. Default "User".
+     * - `finder`: Table finder. Default "all".
+     * - `fields`: Specify password field for removal in returned user identity.
+     *   Default `['password' => 'password']`.
+     * - `sessionKey`: Session key to write user record to. Default "Auth.User".
+     * - `getUserCallback`: The callback method which will be called on user
+     *   model for getting user record matching social profile. Defaults "getUser".
+     * - `serviceConfig`: SocialConnect/Auth service providers config.
+     *
      * @var array
      */
     protected $_defaultConfig = [

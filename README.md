@@ -60,6 +60,9 @@ You can configure the middleware in your `Application::middleware()` method as s
 $middleware->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
     // Request method type use to initiate authentication.
     'requestMethod' => 'POST',
+    // Login page URL. In case of auth failure user is redirected to login
+    // page with "error" query string var.
+    'loginUrl' => '/users/login',
     // URL string or array to redirect to after authentication.
     'loginRedirect' => '/',
     // Boolean indicating whether user identity should be returned as entity.
@@ -113,11 +116,11 @@ crawlers from following the link. (Adding "nofollow" attribute to link doesn't
 suffice as it's often ignored by bots/crawlers.) If you prefer using GET you can
 still do so by configuring the middleware with `'requestMethod' => 'GET'`.
 
-Once a user is authenticated through the provider the authenticator gets the user
+Once a user is authenticated through the provider the middleware gets the user
 profile from the identity provider and using that tries to find the corresponding
 user record using the user model. If no user is found it calls the `getUser` method
 of your user model. The method recieves social profile model entity as argument
-and return an entity for the new user. E.g.
+and return an entity for the user. E.g.
 
 ```php
 // src/Model/Table/UsersTable.php
@@ -151,6 +154,14 @@ public function getUser(EntityInterface $profile) {
     return $user;
 }
 ```
+
+In case of authentication failure user is redirected back to login URL with
+`error` query string variable. It can have one of these values:
+
+- `provider_failure`: Auth through provider failed.
+- `finder_failure`: Finder failed to return user record. An e.g. of this is
+  a user has been authenticated through provider but your finder that condition
+  to not return inactivate user.
 
 Copyright
 ---------
