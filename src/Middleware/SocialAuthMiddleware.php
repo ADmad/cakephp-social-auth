@@ -86,7 +86,7 @@ class SocialAuthMiddleware
     protected $_userModel;
 
     /**
-     * Error
+     * Error.
      *
      * @var string
      */
@@ -212,7 +212,7 @@ class SocialAuthMiddleware
         } catch (\Exception $e) {
             $this->_error = 'provider_failure';
 
-            return null;
+            return;
         }
 
         $user = null;
@@ -249,7 +249,7 @@ class SocialAuthMiddleware
             if ($profile->user_id) {
                 $this->_error = 'finder_failure';
 
-                return null;
+                return;
             }
 
             $user = $this->_getUserEntity($profile);
