@@ -86,7 +86,7 @@ class SocialAuthMiddleware
     protected $_userModel;
 
     /**
-     * Error
+     * Error.
      *
      * @var string
      */
