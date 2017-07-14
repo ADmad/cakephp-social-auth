@@ -169,13 +169,8 @@ class SocialAuthMiddleware
 
         $user = $this->_getUser($providerName, $request);
         if (!$user) {
-            $redirectUrl = Router::url($config['loginUrl'], true);
-            if ($this->_error) {
-                $redirectUrl .= '?error=' . $this->_error;
-            }
-
             return $response->withLocation(
-                $redirectUrl
+                Router::url($config['loginUrl'], true) . '?error=' . $this->_error
             );
         }
 
