@@ -8,3 +8,4 @@ disabled:
   - concat_without_spaces
   - phpdoc_align
   - spaces_cast
+  - simplified_null_return
