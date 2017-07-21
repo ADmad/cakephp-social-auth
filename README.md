@@ -125,7 +125,7 @@ and return an entity for the user. E.g.
 ```php
 // src/Model/Table/UsersTable.php
 
-public function getUser(EntityInterface $profile) {
+public function getUser(\Cake\Datasource\EntityInterface $profile) {
     // Make sure here that all the required fields are actually present
     if (empty($profile->email)) {
         throw new \RuntimeException('Could not find email in social profile.');
