@@ -137,7 +137,7 @@ public function getUser(\Cake\Datasource\EntityInterface $profile) {
     // per user.
     $user = $this->find()
         ->where(['email' => $profile->email])
-        ->firt();
+        ->first();
 
     if ($user) {
         return $user;
