@@ -88,6 +88,11 @@ $middleware->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
                 'applicationSecret' => '<application secret>',
                 'scope' => [
                     'email'
+                ],
+                'fields' => [
+                    'email'
+                    // To get a full list of all posible values, refer to
+                    // https://developers.facebook.com/docs/graph-api/reference/user 
                 ]
             ],
         ]
