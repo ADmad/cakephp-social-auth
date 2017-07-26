@@ -91,6 +91,8 @@ $middleware->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
                 ],
                 'fields' => [
                     'email'
+                    // To get a full list of all posible values, refer to
+                    // https://developers.facebook.com/docs/graph-api/reference/user 
                 ]
             ],
         ]
