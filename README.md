@@ -88,6 +88,9 @@ $middleware->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
                 'applicationSecret' => '<application secret>',
                 'scope' => [
                     'email'
+                ],
+                'fields' => [
+                    'email'
                 ]
             ],
         ]
