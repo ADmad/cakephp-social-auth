@@ -52,12 +52,14 @@ Usage
 
 The plugin provides a `\ADmad\SocialAuth\Middleware\SocialAuthMiddleware` which
 handles authentication process through social providers.
+
 You can configure the middleware in your `Application::middleware()` method as shown:
 
 ```php
 // src/Application.php
 
-$middleware->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
+// Be sure to add SocialAuthMiddleware after RoutingMiddleware
+$middlewareQueue->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
     // Request method type use to initiate authentication.
     'requestMethod' => 'POST',
     // Login page URL. In case of auth failure user is redirected to login
@@ -73,7 +75,7 @@ $middleware->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
     'finder' => 'all',
     // Fields.
     'fields' => [
-        'password' => 'password'
+        'password' => 'password',
     ],
     // Session key to which to write identity record to.
     'sessionKey' => 'Auth.User',
@@ -87,15 +89,15 @@ $middleware->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
                 'applicationId' => '<application id>',
                 'applicationSecret' => '<application secret>',
                 'scope' => [
-                    'email'
+                    'email',
                 ],
                 'fields' => [
-                    'email'
+                    'email',
                     // To get a full list of all posible values, refer to
                     // https://developers.facebook.com/docs/graph-api/reference/user 
-                ]
+                ],
             ],
-        ]
+        ],
     ],
 ]));
 ```
