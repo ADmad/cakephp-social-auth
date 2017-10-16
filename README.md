@@ -97,6 +97,14 @@ $middlewareQueue->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
                     // https://developers.facebook.com/docs/graph-api/reference/user 
                 ],
             ],
+            'google' => [
+                'applicationId' => '<application id>',
+                'applicationSecret' => '<application secret>',
+                'scope' => [
+                    'https://www.googleapis.com/auth/userinfo.email',
+                    'https://www.googleapis.com/auth/userinfo.profile',
+                ],
+            ],            
         ],
     ],
 ]));
