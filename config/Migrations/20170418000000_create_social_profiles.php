@@ -56,11 +56,6 @@ class CreateSocialProfiles extends AbstractMigration
                 'limit' => 255,
                 'null' => true,
             ])
-            ->addColumn('picture', 'string', [
-                'default' => null,
-                'limit' => 255,
-                'null' => true,
-            ])
             ->addColumn('gender', 'string', [
                 'default' => null,
                 'limit' => 255,
