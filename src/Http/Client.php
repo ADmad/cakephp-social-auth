@@ -8,7 +8,7 @@
 
 namespace ADmad\SocialAuth\Http;
 
-use Cake\Network\Http\Client as HttpClient;
+use Cake\Http\Client as HttpClient;
 use InvalidArgumentException;
 use SocialConnect\Common\Http\Client\Client as SocialConnectClient;
 use SocialConnect\Common\Http\Response;
