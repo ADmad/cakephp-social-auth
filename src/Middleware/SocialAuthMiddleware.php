@@ -183,11 +183,11 @@ class SocialAuthMiddleware
 
         $user->unsetProperty($config['fields']['password']);
 
+        $request->session()->write($config['sessionKey'], $user);
+
         if (!$config['userEntity']) {
             $user = $user->toArray();
         }
-
-        $request->session()->write($config['sessionKey'], $user);
 
         $this->_userModel->dispatchEvent(self::EVENT_AFTER_LOGIN, ['user' => $user]);
 
