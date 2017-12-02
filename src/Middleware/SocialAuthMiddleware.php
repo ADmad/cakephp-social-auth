@@ -454,6 +454,7 @@ class SocialAuthMiddleware
      *
      * @param \Psr\Http\Message\ServerRequestInterface $request The current request.
      * @param \Exception $exception The exception to log a message for.
+     *
      * @return string Error message
      */
     protected function _getLogMessage($request, $exception)
