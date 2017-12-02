@@ -94,7 +94,7 @@ $middlewareQueue->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
                 'fields' => [
                     'email',
                     // To get a full list of all posible values, refer to
-                    // https://developers.facebook.com/docs/graph-api/reference/user 
+                    // https://developers.facebook.com/docs/graph-api/reference/user
                 ],
             ],
             'google' => [
@@ -104,9 +104,11 @@ $middlewareQueue->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
                     'https://www.googleapis.com/auth/userinfo.email',
                     'https://www.googleapis.com/auth/userinfo.profile',
                 ],
-            ],            
+            ],
         ],
     ],
+    // Whether social connect errors should be logged. Default `true`.
+    'logErrors' => true,
 ]));
 ```
 
@@ -173,7 +175,8 @@ public function getUser(\Cake\Datasource\EntityInterface $profile) {
 In case of authentication failure user is redirected back to login URL with
 `error` query string variable. It can have one of these values:
 
-- `provider_failure`: Auth through provider failed.
+- `provider_failure`: Auth through provider failed. Details will be logged in
+  `error.log` if `logErrors` option is set to `true`.
 - `finder_failure`: Finder failed to return user record. An e.g. of this is
   a user has been authenticated through provider but your finder has condition
   to not return inactivate user.
