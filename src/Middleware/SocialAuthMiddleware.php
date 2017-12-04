@@ -189,7 +189,7 @@ class SocialAuthMiddleware
 
         $request->session()->write($config['sessionKey'], $user);
 
-        $this->_userModel->dispatchEvent(self::EVENT_AFTER_LOGIN, ['user' => $user]);
+        $this->dispatchEvent(self::EVENT_AFTER_LOGIN, compact('user', 'request', 'response'));
 
         return $response->withLocation(
             Router::url($this->_getRedirectUrl($request), true)
