@@ -19,7 +19,7 @@ Installation
 Run:
 
 ```
-composer require admad/cakephp-social-auth@1.0.x-dev
+composer require admad/cakephp-social-auth
 ```
 
 Setup
