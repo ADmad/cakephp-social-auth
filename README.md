@@ -71,6 +71,8 @@ $middlewareQueue->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
     'userEntity' => false,
     // User model.
     'userModel' => 'Users',
+    // Social profile model.
+    'socialProfileModel' => 'ADmad/SocialAuth.SocialProfiles',
     // Finder type.
     'finder' => 'all',
     // Fields.

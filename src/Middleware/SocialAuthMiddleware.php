@@ -52,6 +52,7 @@ class SocialAuthMiddleware
      *   to this login page with "error" query string var.
      * - `userEntity`: Whether to return entity or array for user. Default `false`.
      * - `userModel`: User model name. Default "User".
+     * - `socialProfileModel`: Social profile model. Default "ADmad/SocialAuth.SocialProfiles".
      * - `finder`: Table finder. Default "all".
      * - `fields`: Specify password field for removal in returned user identity.
      *   Default `['password' => 'password']`.
@@ -212,7 +213,7 @@ class SocialAuthMiddleware
      */
     protected function _getProfile($providerName, ServerRequest $request)
     {
-        $this->loadModel('ADmad/SocialAuth.SocialProfiles');
+        $this->loadModel($this->config('socialProfileModel'));
         $this->SocialProfiles->belongsTo($this->config('userModel'));
 
         try {
