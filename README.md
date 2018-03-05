@@ -65,7 +65,7 @@ $middlewareQueue->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
     // Login page URL. In case of auth failure user is redirected to login
     // page with "error" query string var.
     'loginUrl' => '/users/login',
-    // URL string or array to redirect to after authentication.
+    // URL to redirect to after authentication (string or array).
     'loginRedirect' => '/',
     // Boolean indicating whether user identity should be returned as entity.
     'userEntity' => false,
@@ -79,7 +79,7 @@ $middlewareQueue->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
     ],
     // Session key to which to write identity record to.
     'sessionKey' => 'Auth.User',
-    // The methods in user model which should be called in case of new user.
+    // The method in user model which should be called in case of new user.
     // It should return a User entity.
     'getUserCallback' => 'getUser',
     // SocialConnect Auth service's providers config. https://github.com/SocialConnect/auth/blob/master/README.md
@@ -113,7 +113,7 @@ $middlewareQueue->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
 ```
 
 On your login page you can create links to initiate authentication using required
-providers.
+providers. E.g.
 
 ```php
 echo $this->Form->postLink(
@@ -128,12 +128,12 @@ echo $this->Form->postLink(
 );
 ```
 
-We use a POST link here instead of a normal link to prevent search bots and other
-crawlers from following the link. (Adding "nofollow" attribute to link doesn't
-suffice as it's often ignored by bots/crawlers.) If you prefer using GET you can
-still do so by configuring the middleware with `'requestMethod' => 'GET'`.
+We use a `POST` link here instead of a normal link to prevent search bots and other
+crawlers from following the link. If you prefer using GET you can still do so by
+configuring the middleware with `'requestMethod' => 'GET'`. In this case it's
+advisable to add `nofollow` attribute to the link.
 
-Once a user is authenticated through the provider the middleware gets the user
+Once a user is authenticated through the provider, the middleware gets the user
 profile from the identity provider and using that tries to find the corresponding
 user record using the user model. If no user is found it calls the `getUser` method
 of your user model. The method recieves social profile model entity as argument
@@ -171,6 +171,9 @@ public function getUser(\Cake\Datasource\EntityInterface $profile) {
     return $user;
 }
 ```
+
+Upon successful authentication the user identity is persisted to session
+under key you have specified in middleware config (`Auth.User` by default).
 
 In case of authentication failure user is redirected back to login URL with
 `error` query string variable. It can have one of these values:
