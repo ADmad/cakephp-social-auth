@@ -119,7 +119,8 @@ providers. E.g.
 echo $this->Form->postLink(
     'Login with Facebook',
     [
-        'plugin' => 'ADmad/SocialAuth',
+        'prefix' => false,
+        'plugin' => 'ADmad/SocialAuth',
         'controller' => 'Auth',
         'action' => 'login',
         'provider' => 'facebook',
