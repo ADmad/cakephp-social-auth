@@ -16,15 +16,12 @@ use Cake\Datasource\ModelAwareTrait;
 use Cake\Event\EventManagerTrait;
 use Cake\Http\Response;
 use Cake\Http\ServerRequest;
-use Cake\Log\Log;
 use Cake\Network\Exception\BadRequestException;
 use Cake\Routing\Router;
 use RuntimeException;
 use SocialConnect\Auth\Service;
 use SocialConnect\Common\Entity\User as SocialConnectUser;
-use SocialConnect\Common\Exception as SocialConnectException;
 use SocialConnect\Provider\AccessTokenInterface;
-use SocialConnect\Provider\Exception\InvalidResponse;
 use SocialConnect\Provider\Session\Session;
 
 class SocialAuthMiddleware
@@ -56,7 +53,6 @@ class SocialAuthMiddleware
      * - `getUserCallback`: The callback method which will be called on user
      *   model for getting user record matching social profile. Defaults "getUser".
      * - `serviceConfig`: SocialConnect/Auth service providers config.
-     * - `logErrors`: Whether social connect errors should be logged. Default `true`.
      *
      * @var array
      */
@@ -73,7 +69,6 @@ class SocialAuthMiddleware
         'sessionKey' => 'Auth.User',
         'getUserCallback' => 'getUser',
         'serviceConfig' => [],
-        'logErrors' => true,
     ];
 
     /**
@@ -104,7 +99,7 @@ class SocialAuthMiddleware
      */
     public function __construct(array $config = [])
     {
-        $this->config($config);
+        $this->setConfig($config);
     }
 
     /**
@@ -203,7 +198,7 @@ class SocialAuthMiddleware
      */
     protected function _getUser($providerName, ServerRequest $request)
     {
-        $userModel = $this->config('userModel');
+        $userModel = $this->getConfig('userModel');
 
         $this->loadModel('ADmad/SocialAuth.SocialProfiles');
         $this->SocialProfiles->belongsTo($userModel);
@@ -214,12 +209,8 @@ class SocialAuthMiddleware
             $provider = $this->_getService($request)->getProvider($providerName);
             $accessToken = $provider->getAccessTokenByRequestParameters($request->getQueryParams());
             $identity = $provider->getIdentity($accessToken);
-        } catch (SocialConnectException $e) {
+        } catch (\Exception $e) {
             $this->_error = 'provider_failure';
-
-            if ($this->getConfig('logErrors')) {
-                Log::error($this->_getLogMessage($request, $e));
-            }
 
             return null;
         }
@@ -250,7 +241,7 @@ class SocialAuthMiddleware
                 ->where([
                     $userPkField => $profile->user_id,
                 ])
-                ->find($this->config('finder'))
+                ->find($this->getConfig('finder'))
                 ->first();
         }
 
@@ -270,7 +261,7 @@ class SocialAuthMiddleware
         }
 
         $user->set('social_profile', $profile);
-        $user->unsetProperty($this->config('fields.password'));
+        $user->unsetProperty($this->getConfig('fields.password'));
 
         return $user;
     }
@@ -345,7 +336,7 @@ class SocialAuthMiddleware
      */
     protected function _getUserEntity(EntityInterface $profile)
     {
-        $callbackMethod = $this->config('getUserCallback');
+        $callbackMethod = $this->getConfig('getUserCallback');
 
         $user = call_user_func([$this->_userModel, $callbackMethod], $profile);
 
@@ -381,7 +372,7 @@ class SocialAuthMiddleware
             return $this->_service;
         }
 
-        $serviceConfig = $this->config('serviceConfig');
+        $serviceConfig = $this->getConfig('serviceConfig');
         if (empty($serviceConfig)) {
             Configure::load('social_auth');
             $serviceConfig = Configure::consume('SocialAuth');
@@ -447,37 +438,5 @@ class SocialAuthMiddleware
         }
 
         return $this->getConfig('loginRedirect');
-    }
-
-    /**
-     * Generate the error log message.
-     *
-     * @param \Psr\Http\Message\ServerRequestInterface $request The current request.
-     * @param \Exception $exception The exception to log a message for.
-     *
-     * @return string Error message
-     */
-    protected function _getLogMessage($request, $exception)
-    {
-        $message = sprintf(
-            '[%s] %s',
-            get_class($exception),
-            $exception->getMessage()
-        );
-
-        $message .= "\nRequest URL: " . $request->getRequestTarget();
-
-        $referer = $request->getHeaderLine('Referer');
-        if ($referer) {
-            $message .= "\nReferer URL: " . $referer;
-        }
-
-        if ($exception instanceof InvalidResponse && $exception->getResponse()) {
-            $message .= "\nProvider Response: " . $exception->getResponse()->getBody();
-        }
-
-        $message .= "\nStack Trace:\n" . $exception->getTraceAsString() . "\n\n";
-
-        return $message;
     }
 }
