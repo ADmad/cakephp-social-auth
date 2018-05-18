@@ -104,7 +104,7 @@ class SocialAuthMiddleware
      */
     public function __construct(array $config = [])
     {
-        $this->config($config);
+        $this->setConfig($config);
     }
 
     /**
@@ -185,7 +185,7 @@ class SocialAuthMiddleware
             $user = $user->toArray();
         }
 
-        $request->session()->write($config['sessionKey'], $user);
+        $request->getSession()->write($config['sessionKey'], $user);
 
         return $response->withLocation(
             Router::url($this->_getRedirectUrl($request), true)
@@ -203,7 +203,7 @@ class SocialAuthMiddleware
      */
     protected function _getUser($providerName, ServerRequest $request)
     {
-        $userModel = $this->config('userModel');
+        $userModel = $this->getConfig('userModel');
 
         $this->loadModel('ADmad/SocialAuth.SocialProfiles');
         $this->SocialProfiles->belongsTo($userModel);
@@ -244,13 +244,13 @@ class SocialAuthMiddleware
         }
 
         if ($profile->user_id) {
-            $userPkField = $this->_userModel->aliasField($this->_userModel->primaryKey());
+            $userPkField = $this->_userModel->aliasField($this->_userModel->getPrimaryKey());
 
             $user = $this->_userModel->find()
                 ->where([
                     $userPkField => $profile->user_id,
                 ])
-                ->find($this->config('finder'))
+                ->find($this->getConfig('finder'))
                 ->first();
         }
 
@@ -270,7 +270,7 @@ class SocialAuthMiddleware
         }
 
         $user->set('social_profile', $profile);
-        $user->unsetProperty($this->config('fields.password'));
+        $user->unsetProperty($this->getConfig('fields.password'));
 
         return $user;
     }
@@ -345,7 +345,7 @@ class SocialAuthMiddleware
      */
     protected function _getUserEntity(EntityInterface $profile)
     {
-        $callbackMethod = $this->config('getUserCallback');
+        $callbackMethod = $this->getConfig('getUserCallback');
 
         $user = call_user_func([$this->_userModel, $callbackMethod], $profile);
 
@@ -381,7 +381,7 @@ class SocialAuthMiddleware
             return $this->_service;
         }
 
-        $serviceConfig = $this->config('serviceConfig');
+        $serviceConfig = $this->getConfig('serviceConfig');
         if (empty($serviceConfig)) {
             Configure::load('social_auth');
             $serviceConfig = Configure::consume('SocialAuth');
@@ -393,7 +393,7 @@ class SocialAuthMiddleware
             'action' => 'callback',
         ], true);
 
-        $request->session()->start();
+        $request->getSession()->start();
 
         $this->_service = new Service(
             new Client(),
@@ -413,7 +413,7 @@ class SocialAuthMiddleware
      */
     protected function _setRedirectUrl(ServerRequest $request)
     {
-        $request->session()->delete('SocialAuth.redirectUrl');
+        $request->getSession()->delete('SocialAuth.redirectUrl');
 
         $queryParams = $request->getQueryParams();
         if (empty($queryParams[static::QUERY_STRING_REDIRECT])) {
@@ -427,7 +427,7 @@ class SocialAuthMiddleware
             return;
         }
 
-        $request->session()->write('SocialAuth.redirectUrl', $redirectUrl);
+        $request->getSession()->write('SocialAuth.redirectUrl', $redirectUrl);
     }
 
     /**
@@ -439,9 +439,9 @@ class SocialAuthMiddleware
      */
     protected function _getRedirectUrl(ServerRequest $request)
     {
-        $redirectUrl = $request->session()->read('SocialAuth.redirectUrl');
+        $redirectUrl = $request->getSession()->read('SocialAuth.redirectUrl');
         if ($redirectUrl) {
-            $request->session()->delete('SocialAuth.redirectUrl');
+            $request->getSession()->delete('SocialAuth.redirectUrl');
 
             return $redirectUrl;
         }
