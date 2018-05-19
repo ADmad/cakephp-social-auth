@@ -34,6 +34,13 @@ class SocialAuthMiddleware
     use ModelAwareTrait;
 
     /**
+     * The name of the event that is fired immediately afterLogin.
+     *
+     * @const string
+     */
+    const EVENT_AFTER_LOGIN = 'SocialAuth.afterLogin';
+
+    /**
      * The query string key used for remembering the referrered page when
      * getting redirected to login.
      */
@@ -186,6 +193,8 @@ class SocialAuthMiddleware
         }
 
         $request->getSession()->write($config['sessionKey'], $user);
+
+        $this->dispatchEvent(self::EVENT_AFTER_LOGIN, compact('user', 'request', 'response'));
 
         return $response->withLocation(
             Router::url($this->_getRedirectUrl($request), true)
