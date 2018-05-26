@@ -27,9 +27,6 @@ use SocialConnect\Provider\AccessTokenInterface;
 use SocialConnect\Provider\Exception\InvalidResponse;
 use SocialConnect\Provider\Session\Session;
 
-/**
- * @property \ADmad\SocialAuth\Model\Table\SocialProfilesTable $SocialProfiles
- */
 class SocialAuthMiddleware
 {
     use EventManagerTrait;
@@ -83,16 +80,23 @@ class SocialAuthMiddleware
     /**
      * SocialConnect service.
      *
-     * @var \SocialConnect\Auth\Service
+     * @var \SocialConnect\Auth\Service|null
      */
     protected $_service;
 
     /**
      * User model instance.
      *
-     * @var \Cake\ORM\Table
+     * @var \Cake\Datasource\RepositoryInterface|null
      */
     protected $_userModel;
+
+    /**
+     * Profile model instance.
+     *
+     * @var \Cake\Datasource\RepositoryInterface|null
+     */
+    protected $_profileModel;
 
     /**
      * Error.
@@ -213,8 +217,8 @@ class SocialAuthMiddleware
      */
     protected function _getProfile($providerName, ServerRequest $request)
     {
-        $this->loadModel($this->config('socialProfileModel'));
-        $this->SocialProfiles->belongsTo($this->config('userModel'));
+        $this->_profileModel = $this->loadModel($this->config('socialProfileModel'));
+        $this->_profileModel->belongsTo($this->config('userModel'));
 
         try {
             $provider = $this->_getService($request)->getProvider($providerName);
@@ -230,10 +234,10 @@ class SocialAuthMiddleware
             return null;
         }
 
-        $profile = $this->SocialProfiles->find()
+        $profile = $this->_profileModel->find()
             ->where([
-                $this->SocialProfiles->aliasField('provider') => $providerName,
-                $this->SocialProfiles->aliasField('identifier') => $identity->id,
+                $this->_profileModel->aliasField('provider') => $providerName,
+                $this->_profileModel->aliasField('identifier') => $identity->id,
             ])
             ->first();
 
@@ -260,8 +264,7 @@ class SocialAuthMiddleware
      */
     protected function _getUser($profile)
     {
-        $userModel = $this->config('userModel');
-        $this->_userModel = $this->loadModel($userModel);
+        $this->_userModel = $this->loadModel($this->config('userModel'));
 
         $user = null;
 
@@ -314,7 +317,7 @@ class SocialAuthMiddleware
         EntityInterface $profile = null
     ) {
         if ($profile === null) {
-            $profile = $this->SocialProfiles->newEntity([
+            $profile = $this->_profileModel->newEntity([
                 'provider' => $providerName,
             ]);
         }
@@ -352,7 +355,7 @@ class SocialAuthMiddleware
             }
         }
 
-        return $this->SocialProfiles->patchEntity($profile, $data);
+        return $this->_profileModel->patchEntity($profile, $data);
     }
 
     /**
@@ -385,7 +388,7 @@ class SocialAuthMiddleware
      */
     protected function _saveProfile(EntityInterface $profile)
     {
-        if (!$this->SocialProfiles->save($profile)) {
+        if (!$this->_profileModel->save($profile)) {
             throw new RuntimeException('Unable to save social profile.');
         }
     }
