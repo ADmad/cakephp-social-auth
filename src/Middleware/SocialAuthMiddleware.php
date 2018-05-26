@@ -177,6 +177,8 @@ class SocialAuthMiddleware
      */
     protected function _handleCallbackAction(ServerRequest $request, Response $response)
     {
+        $this->_setupModelInstances();
+
         $config = $this->getConfig();
         $providerName = $request->getParam('provider');
 
@@ -208,6 +210,19 @@ class SocialAuthMiddleware
     }
 
     /**
+     * Setup model instances.
+     *
+     * @return void
+     */
+    protected function _setupModelInstances()
+    {
+        $this->_profileModel = $this->loadModel($this->config('socialProfileModel'));
+        $this->_profileModel->belongsTo($this->config('userModel'));
+
+        $this->_userModel = $this->loadModel($this->config('userModel'));
+    }
+
+    /**
      * Get social profile record.
      *
      * @param string $providerName Provider name.
@@ -217,9 +232,6 @@ class SocialAuthMiddleware
      */
     protected function _getProfile($providerName, ServerRequest $request)
     {
-        $this->_profileModel = $this->loadModel($this->config('socialProfileModel'));
-        $this->_profileModel->belongsTo($this->config('userModel'));
-
         try {
             $provider = $this->_getService($request)->getProvider($providerName);
             $accessToken = $provider->getAccessTokenByRequestParameters($request->getQueryParams());
@@ -264,8 +276,6 @@ class SocialAuthMiddleware
      */
     protected function _getUser($profile)
     {
-        $this->_userModel = $this->loadModel($this->config('userModel'));
-
         $user = null;
 
         if ($profile->get('user_id')) {
