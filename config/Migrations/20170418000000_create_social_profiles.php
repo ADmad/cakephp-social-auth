@@ -61,6 +61,11 @@ class CreateSocialProfiles extends AbstractMigration
                 'limit' => 255,
                 'null' => true,
             ])
+            ->addColumn('picture_url', 'string', [
+                'default' => null,
+                'limit' => 255,
+                'null' => true,
+            ])
             ->addColumn('email_verified', 'boolean', [
                 'default' => false,
                 'null' => false,

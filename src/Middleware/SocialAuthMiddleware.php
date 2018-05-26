@@ -359,6 +359,9 @@ class SocialAuthMiddleware
                 case 'sex':
                     $data['gender'] = $value;
                     break;
+                case 'pictureURL':
+                    $data['picture_url'] = $value;
+                    break;
                 default:
                     $data[$key] = $value;
                     break;
