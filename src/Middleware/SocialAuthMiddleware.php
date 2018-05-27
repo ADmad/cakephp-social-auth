@@ -446,13 +446,9 @@ class SocialAuthMiddleware
     {
         $request->getSession()->delete('SocialAuth.redirectUrl');
 
-        $queryParams = $request->getQueryParams();
-        if (empty($queryParams[static::QUERY_STRING_REDIRECT])) {
-            return;
-        }
-
-        $redirectUrl = $queryParams[static::QUERY_STRING_REDIRECT];
-        if (substr($redirectUrl, 0, 1) !== '/'
+        $redirectUrl = $request->getQuery(static::QUERY_STRING_REDIRECT);
+        if (empty($redirectUrl)
+            || substr($redirectUrl, 0, 1) !== '/'
             || substr($redirectUrl, 0, 2) === '//'
         ) {
             return;
