@@ -87,14 +87,14 @@ class SocialAuthMiddleware
     /**
      * User model instance.
      *
-     * @var \Cake\Datasource\RepositoryInterface|null
+     * @var \Cake\ORM\Table|null
      */
     protected $_userModel;
 
     /**
      * Profile model instance.
      *
-     * @var \Cake\Datasource\RepositoryInterface|null
+     * @var \Cake\ORM\Table|null
      */
     protected $_profileModel;
 
@@ -273,7 +273,7 @@ class SocialAuthMiddleware
         $user = null;
 
         if ($profile->get('user_id')) {
-            $userPkField = $this->_userModel->aliasField($this->_userModel->getPrimaryKey());
+            $userPkField = $this->_userModel->aliasField((string)$this->_userModel->getPrimaryKey());
 
             $user = $this->_userModel->find()
                 ->where([
@@ -463,7 +463,7 @@ class SocialAuthMiddleware
      *
      * @param \Cake\Http\ServerRequest $request Request instance.
      *
-     * @return string
+     * @return string|array
      */
     protected function _getRedirectUrl(ServerRequest $request)
     {
