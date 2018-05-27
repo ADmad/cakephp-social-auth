@@ -386,8 +386,8 @@ class SocialAuthMiddleware implements EventDispatcherInterface
     /**
      * Get new user entity.
      *
-     * It dispatches a `SocialConnect.getUser` event. A listener must return
-     * an entity for new user record.
+     * The method specified in "getUserCallback" will be called on the User model
+     * with profile entity. The method should return a persisted user entity.
      *
      * @param \Cake\Datasource\EntityInterface $profile Social profile entity.
      *
@@ -398,6 +398,10 @@ class SocialAuthMiddleware implements EventDispatcherInterface
         $callbackMethod = $this->getConfig('getUserCallback');
 
         $user = call_user_func([$this->_userModel, $callbackMethod], $profile);
+
+        if (!($user instanceof EntityInterface)) {
+            throw new RuntimeException('"getUserCallback" method must return a user entity.');
+        }
 
         return $user;
     }
