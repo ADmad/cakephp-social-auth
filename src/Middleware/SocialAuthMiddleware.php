@@ -47,8 +47,8 @@ class SocialAuthMiddleware
      * - `loginUrl`: Login page URL. In case of auth failure user is redirected
      *   to this login page with "error" query string var.
      * - `userEntity`: Whether to return entity or array for user. Default `false`.
-     * - `userModel`: User model name. Default "User".
-     * - `socialProfileModel`: Social profile model. Default "ADmad/SocialAuth.SocialProfiles".
+     * - `userModel`: User model name. Default "Users".
+     * - `profileModel`: Social profile model. Default "ADmad/SocialAuth.SocialProfiles".
      * - `finder`: Table finder. Default "all".
      * - `fields`: Specify password field for removal in returned user identity.
      *   Default `['password' => 'password']`.
@@ -66,6 +66,7 @@ class SocialAuthMiddleware
         'loginRedirect' => '/',
         'userEntity' => false,
         'userModel' => 'Users',
+        'profileModel' => 'ADmad/SocialAuth.SocialProfiles',
         'finder' => 'all',
         'fields' => [
             'password' => 'password',
@@ -209,7 +210,7 @@ class SocialAuthMiddleware
      */
     protected function _setupModelInstances()
     {
-        $this->_profileModel = $this->loadModel($this->config('socialProfileModel'));
+        $this->_profileModel = $this->loadModel($this->config('profileModel'));
         $this->_profileModel->belongsTo($this->config('userModel'));
 
         $this->_userModel = $this->loadModel($this->config('userModel'));
