@@ -13,6 +13,8 @@ use Cake\Core\Configure;
 use Cake\Core\InstanceConfigTrait;
 use Cake\Datasource\EntityInterface;
 use Cake\Datasource\ModelAwareTrait;
+use Cake\Event\EventDispatcherInterface;
+use Cake\Event\EventManager;
 use Cake\Event\EventManagerTrait;
 use Cake\Http\Response;
 use Cake\Http\ServerRequest;
@@ -26,7 +28,7 @@ use SocialConnect\Provider\AccessTokenInterface;
 use SocialConnect\Provider\Exception\InvalidResponse;
 use SocialConnect\Provider\Session\Session;
 
-class SocialAuthMiddleware
+class SocialAuthMiddleware implements EventDispatcherInterface
 {
     use EventManagerTrait;
     use InstanceConfigTrait;
@@ -37,6 +39,11 @@ class SocialAuthMiddleware
      * getting redirected to login.
      */
     const QUERY_STRING_REDIRECT = 'redirect';
+
+    /**
+     * The name of the event that is fired after user identification.
+     */
+    const EVENT_AFTER_IDENTIFY = 'SocialAuth.afterIdentify';
 
     /**
      * Default config.
@@ -109,10 +116,15 @@ class SocialAuthMiddleware
      * Constructor.
      *
      * @param array $config Configuration.
+     * @param \Cake\Event\EventManager|null $eventManager Event manager instance.
      */
-    public function __construct(array $config = [])
+    public function __construct(array $config = [], EventManager $eventManager = null)
     {
         $this->setConfig($config);
+
+        if ($eventManager !== null) {
+            $this->setEventManager($eventManager);
+        }
     }
 
     /**
@@ -194,6 +206,12 @@ class SocialAuthMiddleware
 
         if (!$config['userEntity']) {
             $user = $user->toArray();
+        }
+
+        $event = $this->dispatchEvent(self::EVENT_AFTER_IDENTIFY, ['user' => $user]);
+        $result = $event->getResult();
+        if ($result !== null) {
+            $user = $event->getResult();
         }
 
         $request->getSession()->write($config['sessionKey'], $user);
