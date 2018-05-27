@@ -2,9 +2,9 @@
 namespace ADmad\SocialAuth\Test\TestCase\Middleware;
 
 use ADmad\SocialAuth\Middleware\SocialAuthMiddleware;
+use Cake\Http\Exception\MethodNotAllowedException;
 use Cake\Http\Response;
 use Cake\Http\ServerRequestFactory;
-use Cake\Network\Exception\BadRequestException;
 use Cake\Routing\Router;
 use Cake\TestSuite\TestCase;
 
@@ -98,7 +98,11 @@ class SocialAuthMiddlewareTest extends TestCase
             'provider' => 'facebook',
         ]);
 
-        $this->expectException(BadRequestException::class);
+        $class = MethodNotAllowedException::class;
+        if (!class_exists($class)) {
+            $class = 'Cake\Network\Exception\MethodNotAllowedException';
+        }
+        $this->expectException($class);
 
         $middleware = new SocialAuthMiddleware();
         $response = $middleware($request, $this->response, $this->_getNext());

@@ -17,7 +17,6 @@ use Cake\Event\EventManagerTrait;
 use Cake\Http\Response;
 use Cake\Http\ServerRequest;
 use Cake\Log\Log;
-use Cake\Network\Exception\BadRequestException;
 use Cake\Routing\Router;
 use RuntimeException;
 use SocialConnect\Auth\Service;
@@ -146,19 +145,13 @@ class SocialAuthMiddleware
      * @param \Cake\Http\ServerRequest $request The request.
      * @param \Cake\Http\Response $response The response.
      *
-     * @throws \Cake\Network\Exception\BadRequestException If login action is
-     *  called with incorrect request method.
-     *
      * @return \Cake\Http\Response A response.
      */
     protected function _handleLoginAction(ServerRequest $request, Response $response)
     {
+        $request->allowMethod($this->getConfig('requestMethod'));
+
         $providerName = $request->getParam('provider');
-
-        if ($request->getMethod() !== $this->getConfig('requestMethod')) {
-            throw new BadRequestException();
-        }
-
         $provider = $this->_getService($request)->getProvider($providerName);
         $authUrl = $provider->makeAuthUrl();
 
