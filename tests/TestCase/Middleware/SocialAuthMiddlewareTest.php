@@ -1,4 +1,5 @@
 <?php
+
 namespace ADmad\SocialAuth\Test\TestCase\Middleware;
 
 use ADmad\SocialAuth\Middleware\SocialAuthMiddleware;
@@ -9,7 +10,7 @@ use Cake\Routing\Router;
 use Cake\TestSuite\TestCase;
 
 /**
- * Test for SocialAuthMiddleware
+ * Test for SocialAuthMiddleware.
  */
 class SocialAuthMiddlewareTest extends TestCase
 {
