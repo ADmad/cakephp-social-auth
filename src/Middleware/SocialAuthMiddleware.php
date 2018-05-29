@@ -13,11 +13,12 @@ use Cake\Core\Configure;
 use Cake\Core\InstanceConfigTrait;
 use Cake\Datasource\EntityInterface;
 use Cake\Datasource\ModelAwareTrait;
+use Cake\Event\EventDispatcherInterface;
+use Cake\Event\EventManager;
 use Cake\Event\EventManagerTrait;
 use Cake\Http\Response;
 use Cake\Http\ServerRequest;
 use Cake\Log\Log;
-use Cake\Network\Exception\BadRequestException;
 use Cake\Routing\Router;
 use RuntimeException;
 use SocialConnect\Auth\Service;
@@ -27,7 +28,7 @@ use SocialConnect\Provider\AccessTokenInterface;
 use SocialConnect\Provider\Exception\InvalidResponse;
 use SocialConnect\Provider\Session\Session;
 
-class SocialAuthMiddleware
+class SocialAuthMiddleware implements EventDispatcherInterface
 {
     use EventManagerTrait;
     use InstanceConfigTrait;
@@ -40,6 +41,11 @@ class SocialAuthMiddleware
     const QUERY_STRING_REDIRECT = 'redirect';
 
     /**
+     * The name of the event that is fired after user identification.
+     */
+    const EVENT_AFTER_IDENTIFY = 'SocialAuth.afterIdentify';
+
+    /**
      * Default config.
      *
      * ### Options
@@ -48,7 +54,8 @@ class SocialAuthMiddleware
      * - `loginUrl`: Login page URL. In case of auth failure user is redirected
      *   to this login page with "error" query string var.
      * - `userEntity`: Whether to return entity or array for user. Default `false`.
-     * - `userModel`: User model name. Default "User".
+     * - `userModel`: User model name. Default "Users".
+     * - `profileModel`: Social profile model. Default "ADmad/SocialAuth.SocialProfiles".
      * - `finder`: Table finder. Default "all".
      * - `fields`: Specify password field for removal in returned user identity.
      *   Default `['password' => 'password']`.
@@ -66,6 +73,7 @@ class SocialAuthMiddleware
         'loginRedirect' => '/',
         'userEntity' => false,
         'userModel' => 'Users',
+        'profileModel' => 'ADmad/SocialAuth.SocialProfiles',
         'finder' => 'all',
         'fields' => [
             'password' => 'password',
@@ -79,16 +87,23 @@ class SocialAuthMiddleware
     /**
      * SocialConnect service.
      *
-     * @var \SocialConnect\Auth\Service
+     * @var \SocialConnect\Auth\Service|null
      */
     protected $_service;
 
     /**
      * User model instance.
      *
-     * @var \Cake\Datasource\RepositoryInterface
+     * @var \Cake\ORM\Table|null
      */
     protected $_userModel;
+
+    /**
+     * Profile model instance.
+     *
+     * @var \Cake\ORM\Table|null
+     */
+    protected $_profileModel;
 
     /**
      * Error.
@@ -101,10 +116,15 @@ class SocialAuthMiddleware
      * Constructor.
      *
      * @param array $config Configuration.
+     * @param \Cake\Event\EventManager|null $eventManager Event manager instance.
      */
-    public function __construct(array $config = [])
+    public function __construct(array $config = [], EventManager $eventManager = null)
     {
         $this->setConfig($config);
+
+        if ($eventManager !== null) {
+            $this->setEventManager($eventManager);
+        }
     }
 
     /**
@@ -138,19 +158,13 @@ class SocialAuthMiddleware
      * @param \Cake\Http\ServerRequest $request The request.
      * @param \Cake\Http\Response $response The response.
      *
-     * @throws \Cake\Network\Exception\BadRequestException If login action is
-     *  called with incorrect request method.
-     *
      * @return \Cake\Http\Response A response.
      */
     protected function _handleLoginAction(ServerRequest $request, Response $response)
     {
+        $request->allowMethod($this->getConfig('requestMethod'));
+
         $providerName = $request->getParam('provider');
-
-        if ($request->getMethod() !== $this->getConfig('requestMethod')) {
-            throw new BadRequestException();
-        }
-
         $provider = $this->_getService($request)->getProvider($providerName);
         $authUrl = $provider->makeAuthUrl();
 
@@ -169,10 +183,19 @@ class SocialAuthMiddleware
      */
     protected function _handleCallbackAction(ServerRequest $request, Response $response)
     {
+        $this->_setupModelInstances();
+
         $config = $this->getConfig();
         $providerName = $request->getParam('provider');
 
-        $user = $this->_getUser($providerName, $request);
+        $profile = $this->_getProfile($providerName, $request);
+        if (!$profile) {
+            return $response->withLocation(
+                Router::url($config['loginUrl'], true) . '?error=' . $this->_error
+            );
+        }
+
+        $user = $this->_getUser($profile);
         if (!$user) {
             return $response->withLocation(
                 Router::url($config['loginUrl'], true) . '?error=' . $this->_error
@@ -185,6 +208,12 @@ class SocialAuthMiddleware
             $user = $user->toArray();
         }
 
+        $event = $this->dispatchEvent(self::EVENT_AFTER_IDENTIFY, ['user' => $user]);
+        $result = $event->getResult();
+        if ($result !== null) {
+            $user = $event->getResult();
+        }
+
         $request->getSession()->write($config['sessionKey'], $user);
 
         return $response->withLocation(
@@ -193,23 +222,28 @@ class SocialAuthMiddleware
     }
 
     /**
-     * Get user record.
+     * Setup model instances.
+     *
+     * @return void
+     */
+    protected function _setupModelInstances()
+    {
+        $this->_profileModel = $this->loadModel($this->config('profileModel'));
+        $this->_profileModel->belongsTo($this->config('userModel'));
+
+        $this->_userModel = $this->loadModel($this->config('userModel'));
+    }
+
+    /**
+     * Get social profile record.
      *
      * @param string $providerName Provider name.
      * @param \Cake\Http\ServerRequest $request Request instance.
      *
-     * @return array|\Cake\Database\EntityInterface|null User array or entity
-     *   on success, null on failure.
+     * @return \Cake\Datasource\EntityInterface|null
      */
-    protected function _getUser($providerName, ServerRequest $request)
+    protected function _getProfile($providerName, ServerRequest $request)
     {
-        $userModel = $this->getConfig('userModel');
-
-        $this->loadModel('ADmad/SocialAuth.SocialProfiles');
-        $this->SocialProfiles->belongsTo($userModel);
-
-        $this->_userModel = $this->loadModel($userModel);
-
         try {
             $provider = $this->_getService($request)->getProvider($providerName);
             $accessToken = $provider->getAccessTokenByRequestParameters($request->getQueryParams());
@@ -224,12 +258,10 @@ class SocialAuthMiddleware
             return null;
         }
 
-        $user = null;
-
-        $profile = $this->SocialProfiles->find()
+        $profile = $this->_profileModel->find()
             ->where([
-                $this->SocialProfiles->aliasField('provider') => $providerName,
-                $this->SocialProfiles->aliasField('identifier') => $identity->id,
+                $this->_profileModel->aliasField('provider') => $providerName,
+                $this->_profileModel->aliasField('identifier') => $identity->id,
             ])
             ->first();
 
@@ -243,26 +275,41 @@ class SocialAuthMiddleware
             $this->_saveProfile($profile);
         }
 
-        if ($profile->user_id) {
-            $userPkField = $this->_userModel->aliasField($this->_userModel->getPrimaryKey());
+        return $profile;
+    }
+
+    /**
+     * Get user record.
+     *
+     * @param \Cake\Datasource\EntityInterface $profile Social profile entity
+     *
+     * @return array|\Cake\Datasource\EntityInterface|null User array or entity
+     *   on success, null on failure.
+     */
+    protected function _getUser($profile)
+    {
+        $user = null;
+
+        if ($profile->get('user_id')) {
+            $userPkField = $this->_userModel->aliasField((string)$this->_userModel->getPrimaryKey());
 
             $user = $this->_userModel->find()
                 ->where([
-                    $userPkField => $profile->user_id,
+                    $userPkField => $profile->get('user_id'),
                 ])
                 ->find($this->getConfig('finder'))
                 ->first();
         }
 
         if (!$user) {
-            if ($profile->user_id) {
+            if ($profile->get('user_id')) {
                 $this->_error = 'finder_failure';
 
                 return null;
             }
 
             $user = $this->_getUserEntity($profile);
-            $profile->user_id = $user->id;
+            $profile->set('user_id', $user->id);
         }
 
         if ($profile->isDirty()) {
@@ -292,7 +339,7 @@ class SocialAuthMiddleware
         EntityInterface $profile = null
     ) {
         if ($profile === null) {
-            $profile = $this->SocialProfiles->newEntity([
+            $profile = $this->_profileModel->newEntity([
                 'provider' => $providerName,
             ]);
         }
@@ -324,20 +371,23 @@ class SocialAuthMiddleware
                 case 'sex':
                     $data['gender'] = $value;
                     break;
+                case 'pictureURL':
+                    $data['picture_url'] = $value;
+                    break;
                 default:
                     $data[$key] = $value;
                     break;
             }
         }
 
-        return $this->SocialProfiles->patchEntity($profile, $data);
+        return $this->_profileModel->patchEntity($profile, $data);
     }
 
     /**
      * Get new user entity.
      *
-     * It dispatches a `SocialConnect.getUser` event. A listener must return
-     * an entity for new user record.
+     * The method specified in "getUserCallback" will be called on the User model
+     * with profile entity. The method should return a persisted user entity.
      *
      * @param \Cake\Datasource\EntityInterface $profile Social profile entity.
      *
@@ -348,6 +398,10 @@ class SocialAuthMiddleware
         $callbackMethod = $this->getConfig('getUserCallback');
 
         $user = call_user_func([$this->_userModel, $callbackMethod], $profile);
+
+        if (!($user instanceof EntityInterface)) {
+            throw new RuntimeException('"getUserCallback" method must return a user entity.');
+        }
 
         return $user;
     }
@@ -363,7 +417,7 @@ class SocialAuthMiddleware
      */
     protected function _saveProfile(EntityInterface $profile)
     {
-        if (!$this->SocialProfiles->save($profile)) {
+        if (!$this->_profileModel->save($profile)) {
             throw new RuntimeException('Unable to save social profile.');
         }
     }
@@ -415,13 +469,9 @@ class SocialAuthMiddleware
     {
         $request->getSession()->delete('SocialAuth.redirectUrl');
 
-        $queryParams = $request->getQueryParams();
-        if (empty($queryParams[static::QUERY_STRING_REDIRECT])) {
-            return;
-        }
-
-        $redirectUrl = $queryParams[static::QUERY_STRING_REDIRECT];
-        if (substr($redirectUrl, 0, 1) !== '/'
+        $redirectUrl = $request->getQuery(static::QUERY_STRING_REDIRECT);
+        if (empty($redirectUrl)
+            || substr($redirectUrl, 0, 1) !== '/'
             || substr($redirectUrl, 0, 2) === '//'
         ) {
             return;
@@ -435,7 +485,7 @@ class SocialAuthMiddleware
      *
      * @param \Cake\Http\ServerRequest $request Request instance.
      *
-     * @return string
+     * @return string|array
      */
     protected function _getRedirectUrl(ServerRequest $request)
     {
