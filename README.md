@@ -1,5 +1,4 @@
-CakePHP SocialAuth Plugin
-=========================
+# CakePHP SocialAuth Plugin
 
 [![Total Downloads](https://img.shields.io/packagist/dt/ADmad/cakephp-social-auth.svg?style=flat-square)](https://packagist.org/packages/admad/cakephp-social-auth)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
@@ -8,13 +7,11 @@ A CakePHP plugin which allows you authenticate using social providers like
 Facebook/Google/Twitter etc. using [SocialConnect/auth](https://github.com/SocialConnect/auth)
 social sign on library.
 
-Requirements
-------------
+## Requirements
 
 * CakePHP 3.4+.
 
-Installation
-------------
+## Installation
 
 Run:
 
@@ -22,8 +19,7 @@ Run:
 composer require admad/cakephp-social-auth
 ```
 
-Setup
------
+## Setup
 
 Load the plugin by running following command in terminal:
 
@@ -37,8 +33,7 @@ or by manually adding following line to your app's `config/bootstrap.php`:
 Plugin::load('ADmad/SocialAuth', ['bootstrap' => true, 'routes' => true]);
 ```
 
-Database
---------
+## Database
 
 This plugin requires a migration to generate a `social_profiles` table, and it
 can be generated via the official Migrations plugin as follows:
@@ -47,8 +42,9 @@ can be generated via the official Migrations plugin as follows:
 bin/cake migrations migrate -p ADmad/SocialAuth
 ```
 
-Usage
------
+## Usage
+
+### Middleware config
 
 The plugin provides a `\ADmad\SocialAuth\Middleware\SocialAuthMiddleware` which
 handles authentication process through social providers.
@@ -114,6 +110,8 @@ $middlewareQueue->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
 ]));
 ```
 
+### Login links
+
 On your login page you can create links to initiate authentication using required
 providers. E.g.
 
@@ -121,8 +119,8 @@ providers. E.g.
 echo $this->Form->postLink(
     'Login with Facebook',
     [
-        'prefix' => false,
-        'plugin' => 'ADmad/SocialAuth',
+        'prefix' => false,
+        'plugin' => 'ADmad/SocialAuth',
         'controller' => 'Auth',
         'action' => 'login',
         'provider' => 'facebook',
@@ -135,6 +133,11 @@ We use a `POST` link here instead of a normal link to prevent search bots and ot
 crawlers from following the link. If you prefer using GET you can still do so by
 configuring the middleware with `'requestMethod' => 'GET'`. In this case it's
 advisable to add `nofollow` attribute to the link.
+
+### Authentication process
+
+Depending on the provider name in the login URL the authentication process is
+initiated.
 
 Once a user is authenticated through the provider, the middleware gets the user
 profile from the identity provider and using that tries to find the corresponding
@@ -175,8 +178,13 @@ public function getUser(\Cake\Datasource\EntityInterface $profile) {
 }
 ```
 
-Upon successful authentication the user identity is persisted to session
-under key you have specified in middleware config (`Auth.User` by default).
+Upon successful authentication an `SocialAuth.afterIdentify` event is
+dispatched with the user entity. You can setup a listener for this event to
+perform required tasks after a successful authentication. The listener can
+optionally return an user entity as event result.
+
+The user identity is persisted to session under key you have specified in
+middleware config (`Auth.User` by default).
 
 In case of authentication failure user is redirected back to login URL with
 `error` query string variable. It can have one of these values:
@@ -189,7 +197,7 @@ In case of authentication failure user is redirected back to login URL with
 
 Copyright
 ---------
-Copyright 2017 ADmad
+Copyright 2018 ADmad
 
 License
 -------
