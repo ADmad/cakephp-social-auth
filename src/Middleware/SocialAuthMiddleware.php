@@ -63,6 +63,8 @@ class SocialAuthMiddleware implements EventDispatcherInterface
      * - `getUserCallback`: The callback method which will be called on user
      *   model for getting user record matching social profile. Defaults "getUser".
      * - `serviceConfig`: SocialConnect/Auth service providers config.
+     * - `httpClient`: The HTTP Client to use for SocialConnect Auth service.
+     *   Either a  class name string or instance. Defaults to `'ADmad\SocialAuth\Http\Client'`.
      * - `logErrors`: Whether social connect errors should be logged. Default `true`.
      *
      * @var array
@@ -81,6 +83,7 @@ class SocialAuthMiddleware implements EventDispatcherInterface
         'sessionKey' => 'Auth.User',
         'getUserCallback' => 'getUser',
         'serviceConfig' => [],
+        'httpClient' => Client::class,
         'logErrors' => true,
     ];
 
@@ -449,8 +452,13 @@ class SocialAuthMiddleware implements EventDispatcherInterface
 
         $request->getSession()->start();
 
+        $httpClient = $this->getConfig('httpClient');
+        if (is_string($httpClient)) {
+            $httpClient = new $httpClient();
+        }
+
         $this->_service = new Service(
-            new Client(),
+            $httpClient,
             new Session(),
             $serviceConfig
         );
