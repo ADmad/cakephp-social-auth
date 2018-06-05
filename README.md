@@ -7,10 +7,6 @@ A CakePHP plugin which allows you authenticate using social providers like
 Facebook/Google/Twitter etc. using [SocialConnect/auth](https://github.com/SocialConnect/auth)
 social sign on library.
 
-## Requirements
-
-* CakePHP 3.4+.
-
 ## Installation
 
 Run:
@@ -105,6 +101,10 @@ $middlewareQueue->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
             ],
         ],
     ],
+    // If you want to use CURL instead of CakePHP's Http Client set this to
+    // '\SocialConnect\Common\Http\Client\Curl' or another client instance that
+    // SocialConnect/Auth's Service class accepts.
+    'httpClient' => '\ADmad\SocialAuth\Http\Client',
     // Whether social connect errors should be logged. Default `true`.
     'logErrors' => true,
 ]));
