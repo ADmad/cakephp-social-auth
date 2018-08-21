@@ -36,7 +36,7 @@ class SocialProfilesTable extends Table
      */
     protected function _initializeSchema(TableSchema $schema)
     {
-        $schema->columnType('access_token', 'socialauth.serialize');
+        $schema->setColumnType('access_token', 'socialauth.serialize');
 
         return $schema;
     }

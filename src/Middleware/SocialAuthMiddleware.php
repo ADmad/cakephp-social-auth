@@ -231,10 +231,10 @@ class SocialAuthMiddleware implements EventDispatcherInterface
      */
     protected function _setupModelInstances()
     {
-        $this->_profileModel = $this->loadModel($this->config('profileModel'));
-        $this->_profileModel->belongsTo($this->config('userModel'));
+        $this->_profileModel = $this->loadModel($this->getConfig('profileModel'));
+        $this->_profileModel->belongsTo($this->getConfig('userModel'));
 
-        $this->_userModel = $this->loadModel($this->config('userModel'));
+        $this->_userModel = $this->loadModel($this->getConfig('userModel'));
     }
 
     /**
