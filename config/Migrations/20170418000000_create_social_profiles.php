@@ -19,6 +19,7 @@ class CreateSocialProfiles extends AbstractMigration
             ])
             ->addColumn('access_token', 'binary', [
                 'default' => null,
+                'limit' => 65535,
                 'null' => false,
             ])
             ->addColumn('identifier', 'string', [
