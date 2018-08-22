@@ -63,7 +63,7 @@ class SerializeType extends Type implements TypeInterface
             return PDO::PARAM_NULL;
         }
 
-        return PDO::PARAM_STR;
+        return PDO::PARAM_LOB;
     }
 
     /**
