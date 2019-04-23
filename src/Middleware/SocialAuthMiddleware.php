@@ -14,8 +14,8 @@ use Cake\Core\InstanceConfigTrait;
 use Cake\Datasource\EntityInterface;
 use Cake\Datasource\ModelAwareTrait;
 use Cake\Event\EventDispatcherInterface;
+use Cake\Event\EventDispatcherTrait;
 use Cake\Event\EventManager;
-use Cake\Event\EventManagerTrait;
 use Cake\Http\Response;
 use Cake\Http\ServerRequest;
 use Cake\Log\Log;
@@ -30,7 +30,7 @@ use SocialConnect\Provider\Session\Session;
 
 class SocialAuthMiddleware implements EventDispatcherInterface
 {
-    use EventManagerTrait;
+    use EventDispatcherTrait;
     use InstanceConfigTrait;
     use ModelAwareTrait;
 
