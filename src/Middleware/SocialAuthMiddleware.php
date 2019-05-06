@@ -198,7 +198,7 @@ class SocialAuthMiddleware implements EventDispatcherInterface
             );
         }
 
-        $user = $this->_getUser($profile);
+        $user = $this->_getUser($profile, $request->getSession());
         if (!$user) {
             return $response->withLocation(
                 Router::url($config['loginUrl'], true) . '?error=' . $this->_error
@@ -285,11 +285,12 @@ class SocialAuthMiddleware implements EventDispatcherInterface
      * Get user record.
      *
      * @param \Cake\Datasource\EntityInterface $profile Social profile entity
+     * @param \Cake\Http\Session $session Session instance.
      *
      * @return array|\Cake\Datasource\EntityInterface|null User array or entity
      *   on success, null on failure.
      */
-    protected function _getUser($profile)
+    protected function _getUser(EntityInterface $profile, $session)
     {
         $user = null;
 
@@ -311,7 +312,7 @@ class SocialAuthMiddleware implements EventDispatcherInterface
                 return null;
             }
 
-            $user = $this->_getUserEntity($profile);
+            $user = $this->_getUserEntity($profile, $session);
             $profile->set('user_id', $user->id);
         }
 
@@ -393,14 +394,15 @@ class SocialAuthMiddleware implements EventDispatcherInterface
      * with profile entity. The method should return a persisted user entity.
      *
      * @param \Cake\Datasource\EntityInterface $profile Social profile entity.
+     * @param \Cake\Http\Session $session Session instance.
      *
      * @return \Cake\Datasource\EntityInterface User entity.
      */
-    protected function _getUserEntity(EntityInterface $profile)
+    protected function _getUserEntity(EntityInterface $profile, $session)
     {
         $callbackMethod = $this->getConfig('getUserCallback');
 
-        $user = call_user_func([$this->_userModel, $callbackMethod], $profile);
+        $user = call_user_func([$this->_userModel, $callbackMethod], $profile, $session);
 
         if (!($user instanceof EntityInterface)) {
             throw new RuntimeException('"getUserCallback" method must return a user entity.');
