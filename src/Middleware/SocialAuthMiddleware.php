@@ -27,6 +27,7 @@ use SocialConnect\Common\Exception as SocialConnectException;
 use SocialConnect\Provider\AccessTokenInterface;
 use SocialConnect\Provider\Exception\InvalidResponse;
 use SocialConnect\Provider\Session\Session;
+use SocialConnect\Provider\Session\SessionInterface;
 
 class SocialAuthMiddleware implements EventDispatcherInterface
 {
@@ -95,6 +96,13 @@ class SocialAuthMiddleware implements EventDispatcherInterface
     protected $_service;
 
     /**
+     * Session for SocialConnect service.
+     *
+     * @var \SocialConnect\Provider\Session\SessionInterface
+     */
+    protected $_session;
+
+    /**
      * User model instance.
      *
      * @var \Cake\ORM\Table|null
@@ -120,14 +128,17 @@ class SocialAuthMiddleware implements EventDispatcherInterface
      *
      * @param array $config Configuration.
      * @param \Cake\Event\EventManager|null $eventManager Event manager instance.
+     * @param SessionInterface|null $session Session handler for SocialConnect Service
      */
-    public function __construct(array $config = [], EventManager $eventManager = null)
+    public function __construct(array $config = [], EventManager $eventManager = null, SessionInterface $session = null)
     {
         $this->setConfig($config);
 
         if ($eventManager !== null) {
             $this->setEventManager($eventManager);
         }
+
+        $this->_session = $session;
     }
 
     /**
@@ -461,7 +472,7 @@ class SocialAuthMiddleware implements EventDispatcherInterface
 
         $this->_service = new Service(
             $httpClient,
-            new Session(),
+            $this->_session ? $this->_session : new Session(),
             $serviceConfig
         );
 
