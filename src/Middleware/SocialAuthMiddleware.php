@@ -128,7 +128,7 @@ class SocialAuthMiddleware implements EventDispatcherInterface
      *
      * @param array $config Configuration.
      * @param \Cake\Event\EventManager|null $eventManager Event manager instance.
-     * @param SessionInterface|null $session Session handler for SocialConnect Service
+     * @param \SocialConnect\Provider\Session\SessionInterface|null $session Session handler for SocialConnect Service
      */
     public function __construct(array $config = [], EventManager $eventManager = null, SessionInterface $session = null)
     {
