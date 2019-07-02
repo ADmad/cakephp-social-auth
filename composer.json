@@ -4,7 +4,7 @@
     "type": "cakephp-plugin",
     "require": {
         "cakephp/cakephp": "^3.5",
-        "socialconnect/auth": "^1.12"
+        "socialconnect/auth": "^1.14"
     },
     "require-dev": {
         "cakephp/chronos": "^1.1",

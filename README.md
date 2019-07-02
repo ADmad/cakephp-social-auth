@@ -142,16 +142,23 @@ initiated.
 Once a user is authenticated through the provider, the middleware gets the user
 profile from the identity provider and using that tries to find the corresponding
 user record using the user model. If no user is found it calls the `getUser` method
-of your user model. The method recieves social profile model entity as argument
-and return an entity for the user. E.g.
+of your user model. The method recieves social profile model entity and session
+instance as argument and must return an entity for the user.
 
 ```php
 // src/Model/Table/UsersTable.php
 
-public function getUser(\Cake\Datasource\EntityInterface $profile) {
+public function getUser(\Cake\Datasource\EntityInterface $profile, \Cake\Http\Session $session): \Cake\Datatsource\EntityInterface {
     // Make sure here that all the required fields are actually present
     if (empty($profile->email)) {
         throw new \RuntimeException('Could not find email in social profile.');
+    }
+
+    // If you want to associate the social entity with currently logged in user
+    // use the $session argument to get user id and find matching user entity.
+    $userId = $session->read('Auth.User.id');
+    if ($userId) {
+        return $this->get($userId);
     }
 
     // Check if user with same email exists. This avoids creating multiple

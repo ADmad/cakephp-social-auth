@@ -8,6 +8,7 @@ use Cake\Http\Response;
 use Cake\Http\ServerRequestFactory;
 use Cake\Routing\Router;
 use Cake\TestSuite\TestCase;
+use SocialConnect\Provider\Session\Dummy;
 
 /**
  * Test for SocialAuthMiddleware.
@@ -80,7 +81,7 @@ class SocialAuthMiddlewareTest extends TestCase
                     ],
                 ],
             ],
-        ]);
+        ], null, new Dummy());
         $response = $middleware($request, $this->response, $this->_getNext());
 
         $this->assertEquals(302, $response->getStatusCode());

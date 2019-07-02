@@ -27,6 +27,7 @@ use SocialConnect\Common\Exception as SocialConnectException;
 use SocialConnect\Provider\AccessTokenInterface;
 use SocialConnect\Provider\Exception\InvalidResponse;
 use SocialConnect\Provider\Session\Session;
+use SocialConnect\Provider\Session\SessionInterface;
 
 class SocialAuthMiddleware implements EventDispatcherInterface
 {
@@ -95,6 +96,13 @@ class SocialAuthMiddleware implements EventDispatcherInterface
     protected $_service;
 
     /**
+     * Session for SocialConnect service.
+     *
+     * @var \SocialConnect\Provider\Session\SessionInterface
+     */
+    protected $_session;
+
+    /**
      * User model instance.
      *
      * @var \Cake\ORM\Table|null
@@ -120,14 +128,17 @@ class SocialAuthMiddleware implements EventDispatcherInterface
      *
      * @param array $config Configuration.
      * @param \Cake\Event\EventManager|null $eventManager Event manager instance.
+     * @param \SocialConnect\Provider\Session\SessionInterface|null $session Session handler for SocialConnect Service
      */
-    public function __construct(array $config = [], EventManager $eventManager = null)
+    public function __construct(array $config = [], EventManager $eventManager = null, SessionInterface $session = null)
     {
         $this->setConfig($config);
 
         if ($eventManager !== null) {
             $this->setEventManager($eventManager);
         }
+
+        $this->_session = $session;
     }
 
     /**
@@ -198,7 +209,7 @@ class SocialAuthMiddleware implements EventDispatcherInterface
             );
         }
 
-        $user = $this->_getUser($profile);
+        $user = $this->_getUser($profile, $request->getSession());
         if (!$user) {
             return $response->withLocation(
                 Router::url($config['loginUrl'], true) . '?error=' . $this->_error
@@ -285,11 +296,12 @@ class SocialAuthMiddleware implements EventDispatcherInterface
      * Get user record.
      *
      * @param \Cake\Datasource\EntityInterface $profile Social profile entity
+     * @param \Cake\Http\Session $session Session instance.
      *
      * @return array|\Cake\Datasource\EntityInterface|null User array or entity
      *   on success, null on failure.
      */
-    protected function _getUser($profile)
+    protected function _getUser(EntityInterface $profile, $session)
     {
         $user = null;
 
@@ -311,7 +323,7 @@ class SocialAuthMiddleware implements EventDispatcherInterface
                 return null;
             }
 
-            $user = $this->_getUserEntity($profile);
+            $user = $this->_getUserEntity($profile, $session);
             $profile->set('user_id', $user->id);
         }
 
@@ -393,14 +405,15 @@ class SocialAuthMiddleware implements EventDispatcherInterface
      * with profile entity. The method should return a persisted user entity.
      *
      * @param \Cake\Datasource\EntityInterface $profile Social profile entity.
+     * @param \Cake\Http\Session $session Session instance.
      *
      * @return \Cake\Datasource\EntityInterface User entity.
      */
-    protected function _getUserEntity(EntityInterface $profile)
+    protected function _getUserEntity(EntityInterface $profile, $session)
     {
         $callbackMethod = $this->getConfig('getUserCallback');
 
-        $user = call_user_func([$this->_userModel, $callbackMethod], $profile);
+        $user = call_user_func([$this->_userModel, $callbackMethod], $profile, $session);
 
         if (!($user instanceof EntityInterface)) {
             throw new RuntimeException('"getUserCallback" method must return a user entity.');
@@ -459,7 +472,7 @@ class SocialAuthMiddleware implements EventDispatcherInterface
 
         $this->_service = new Service(
             $httpClient,
-            new Session(),
+            $this->_session ? $this->_session : new Session(),
             $serviceConfig
         );
 
