@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * ADmad\SocialAuth plugin.
  *
@@ -18,16 +20,16 @@ class Client extends SocialConnectClient
     /**
      * Http Client instance.
      *
-     * @var \Cake\Network\Http\Client
+     * @var \Cake\Http\Client
      */
     protected $_client;
 
     /**
      * Constructor.
      *
-     * @param \Cake\Network\Http\Client $client Http Client instance.
+     * @param \Cake\Http\Client $client Http Client instance.
      */
-    public function __construct(HttpClient $client = null)
+    public function __construct(?HttpClient $client = null)
     {
         $this->_client = is_null($client) ? new HttpClient() : $client;
     }

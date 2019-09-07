@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * ADmad\SocialAuth plugin.
  *
@@ -8,22 +10,21 @@
 
 namespace ADmad\SocialAuth\Database\Type;
 
-use Cake\Database\Driver;
-use Cake\Database\Type;
-use Cake\Database\TypeInterface;
+use Cake\Database\DriverInterface;
+use Cake\Database\Type\BaseType;
 use PDO;
 
-class SerializeType extends Type implements TypeInterface
+class SerializedType extends BaseType
 {
     /**
      * Convert a value data into a serialized string.
      *
      * @param mixed $value The value to convert.
-     * @param \Cake\Database\Driver $driver The driver instance to convert with.
+     * @param \Cake\Database\DriverInterface $driver The driver instance to convert with.
      *
      * @return string|null
      */
-    public function toDatabase($value, Driver $driver)
+    public function toDatabase($value, DriverInterface $driver)
     {
         if ($value === null || is_string($value)) {
             return $value;
@@ -36,11 +37,11 @@ class SerializeType extends Type implements TypeInterface
      * Convert string values to PHP data structure.
      *
      * @param mixed $value The value to convert.
-     * @param \Cake\Database\Driver $driver The driver instance to convert with.
+     * @param \Cake\Database\DriverInterface $driver The driver instance to convert with.
      *
      * @return string|null|array
      */
-    public function toPHP($value, Driver $driver)
+    public function toPHP($value, DriverInterface $driver)
     {
         if ($value === null) {
             return $value;
@@ -53,11 +54,11 @@ class SerializeType extends Type implements TypeInterface
      * Get the correct PDO binding type for string data.
      *
      * @param mixed $value The value being bound.
-     * @param \Cake\Database\Driver $driver The driver.
+     * @param \Cake\Database\DriverInterface $driver The driver.
      *
      * @return int
      */
-    public function toStatement($value, Driver $driver)
+    public function toStatement($value, DriverInterface $driver)
     {
         if ($value === null) {
             return PDO::PARAM_NULL;

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * ADmad\SocialAuth plugin.
  *
@@ -8,7 +10,7 @@
 
 namespace ADmad\SocialAuth\Model\Table;
 
-use Cake\Database\Schema\TableSchema;
+use Cake\Database\Schema\TableSchemaInterface;
 use Cake\ORM\Table;
 
 class SocialProfilesTable extends Table
@@ -20,7 +22,7 @@ class SocialProfilesTable extends Table
      *
      * @return void
      */
-    public function initialize(array $config)
+    public function initialize(array $config): void
     {
         parent::initialize($config);
 
@@ -30,13 +32,13 @@ class SocialProfilesTable extends Table
     /**
      * Set custom type of "access_token" column.
      *
-     * @param \Cake\Database\Schema\TableSchema $schema The table definition fetched from database.
+     * @param \Cake\Database\Schema\TableSchemaInterface $schema The table definition fetched from database.
      *
-     * @return \Cake\Database\Schema\TableSchema
+     * @return \Cake\Database\Schema\TableSchemaInterface
      */
-    protected function _initializeSchema(TableSchema $schema)
+    protected function _initializeSchema(TableSchemaInterface $schema): TableSchemaInterface
     {
-        $schema->setColumnType('access_token', 'socialauth.serialize');
+        $schema->setColumnType('access_token', 'social-auth.serialized');
 
         return $schema;
     }

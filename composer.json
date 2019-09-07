@@ -14,6 +14,12 @@
             "ADmad\\SocialAuth\\": "src"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "ADmad\\SocialAuth\\Test\\": "tests",
+            "TestApp\\": "tests/test_app/src"
+        }
+    },
     "license": "MIT",
     "minimum-stability": "dev",
     "prefer-stable": true
