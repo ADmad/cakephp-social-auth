@@ -15,14 +15,13 @@ use SocialConnect\Provider\Session\Dummy;
  */
 class SocialAuthMiddlewareTest extends TestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
         $this->response = new Response();
 
         include PLUGIN_ROOT . '/config/routes.php';
-        Router::$initialized = true;
     }
 
     protected function _getNext()
