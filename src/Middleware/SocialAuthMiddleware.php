@@ -10,7 +10,6 @@ declare(strict_types=1);
 
 namespace ADmad\SocialAuth\Middleware;
 
-use ADmad\SocialAuth\Http\Client;
 use Cake\Core\Configure;
 use Cake\Core\InstanceConfigTrait;
 use Cake\Datasource\EntityInterface;
@@ -18,6 +17,7 @@ use Cake\Datasource\ModelAwareTrait;
 use Cake\Event\EventDispatcherInterface;
 use Cake\Event\EventDispatcherTrait;
 use Cake\Event\EventManager;
+use Cake\Http\Client;
 use Cake\Http\Response;
 use Cake\Http\ServerRequest;
 use Cake\Log\Log;
@@ -30,10 +30,13 @@ use RuntimeException;
 use SocialConnect\Auth\Service;
 use SocialConnect\Common\Entity\User as SocialConnectUser;
 use SocialConnect\Common\Exception as SocialConnectException;
+use SocialConnect\Common\HttpStack;
 use SocialConnect\Provider\AccessTokenInterface;
 use SocialConnect\Provider\Exception\InvalidResponse;
 use SocialConnect\Provider\Session\Session;
 use SocialConnect\Provider\Session\SessionInterface;
+use Zend\Diactoros\RequestFactory;
+use Zend\Diactoros\StreamFactory;
 
 class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterface
 {
@@ -70,7 +73,6 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      * - `getUserCallback`: The callback method which will be called on user
      *   model for getting user record matching social profile. Defaults "getUser".
      * - `serviceConfig`: SocialConnect/Auth service providers config.
-     * - `httpClient`: The HTTP Client to use for SocialConnect Auth service.
      *   Either a  class name string or instance. Defaults to `'ADmad\SocialAuth\Http\Client'`.
      * - `logErrors`: Whether social connect errors should be logged. Default `true`.
      *
@@ -90,7 +92,6 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
         'sessionKey' => 'Auth.User',
         'getUserCallback' => 'getUser',
         'serviceConfig' => [],
-        'httpClient' => Client::class,
         'logErrors' => true,
     ];
 
@@ -468,21 +469,25 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
             $serviceConfig = Configure::consume('SocialAuth');
         }
 
-        $serviceConfig['redirectUri'] = Router::url([
-            'plugin' => 'ADmad/SocialAuth',
-            'controller' => 'Auth',
-            'action' => 'callback',
-        ], true);
+        if (!isset($serviceConfig['redirectUri'])) {
+            $serviceConfig['redirectUri'] = Router::url([
+                'plugin' => 'ADmad/SocialAuth',
+                'controller' => 'Auth',
+                'action' => 'callback',
+                '${provider}',
+            ], true);
+        }
 
         $request->getSession()->start();
 
-        $httpClient = $this->getConfig('httpClient');
-        if (is_string($httpClient)) {
-            $httpClient = new $httpClient();
-        }
+        $httpStack = new HttpStack(
+            new Client(),
+            new RequestFactory(),
+            new StreamFactory()
+        );
 
         $this->_service = new Service(
-            $httpClient,
+            $httpStack,
             $this->_session ?: new Session(),
             $serviceConfig
         );
