@@ -148,7 +148,7 @@ instance as argument and must return an entity for the user.
 ```php
 // src/Model/Table/UsersTable.php
 
-public function getUser(\Cake\Datasource\EntityInterface $profile, \Cake\Http\Session $session): \Cake\Datatsource\EntityInterface {
+public function getUser(\Cake\Datasource\EntityInterface $profile, \Cake\Http\Session $session) {
     // Make sure here that all the required fields are actually present
     if (empty($profile->email)) {
         throw new \RuntimeException('Could not find email in social profile.');
