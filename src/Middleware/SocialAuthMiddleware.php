@@ -185,7 +185,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      *
      * @return \Cake\Http\Response A response.
      */
-    protected function _handleLoginAction(ServerRequest $request)
+    protected function _handleLoginAction(ServerRequest $request): Response
     {
         $request->allowMethod($this->getConfig('requestMethod'));
 
@@ -205,7 +205,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      *
      * @return \Cake\Http\Response A response.
      */
-    protected function _handleCallbackAction(ServerRequest $request)
+    protected function _handleCallbackAction(ServerRequest $request): Response
     {
         $this->_setupModelInstances();
 
@@ -251,7 +251,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      *
      * @return void
      */
-    protected function _setupModelInstances()
+    protected function _setupModelInstances(): void
     {
         $this->_profileModel = $this->getTableLocator()->get($this->getConfig('profileModel'));
         $this->_profileModel->belongsTo($this->getConfig('userModel'));
@@ -267,7 +267,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      *
      * @return \Cake\Datasource\EntityInterface|null
      */
-    protected function _getProfile($providerName, ServerRequest $request)
+    protected function _getProfile($providerName, ServerRequest $request): ?EntityInterface
     {
         try {
             $provider = $this->_getService($request)->getProvider($providerName);
@@ -313,7 +313,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      * @return \Cake\Datasource\EntityInterface|null User array or entity
      *   on success, null on failure.
      */
-    protected function _getUser(EntityInterface $profile, $session)
+    protected function _getUser(EntityInterface $profile, $session): ?EntityInterface
     {
         $user = null;
 
@@ -367,7 +367,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
         SocialConnectUser $identity,
         AccessTokenInterface $accessToken,
         ?EntityInterface $profile = null
-    ) {
+    ): EntityInterface {
         if ($profile === null) {
             $profile = $this->_profileModel->newEntity([
                 'provider' => $providerName,
@@ -424,7 +424,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      *
      * @return \Cake\Datasource\EntityInterface User entity.
      */
-    protected function _getUserEntity(EntityInterface $profile, $session)
+    protected function _getUserEntity(EntityInterface $profile, $session): EntityInterface
     {
         $callbackMethod = $this->getConfig('getUserCallback');
 
@@ -446,7 +446,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      *
      * @return void
      */
-    protected function _saveProfile(EntityInterface $profile)
+    protected function _saveProfile(EntityInterface $profile): void
     {
         if (!$this->_profileModel->save($profile)) {
             throw new RuntimeException('Unable to save social profile.');
@@ -460,7 +460,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      *
      * @return \SocialConnect\Auth\Service
      */
-    protected function _getService(ServerRequest $request)
+    protected function _getService(ServerRequest $request): Service
     {
         if ($this->_service !== null) {
             return $this->_service;
@@ -505,7 +505,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      *
      * @return void
      */
-    protected function _setRedirectUrl(ServerRequest $request)
+    protected function _setRedirectUrl(ServerRequest $request): void
     {
         $request->getSession()->delete('SocialAuth.redirectUrl');
 
@@ -549,7 +549,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      *
      * @return string Error message
      */
-    protected function _getLogMessage($request, $exception)
+    protected function _getLogMessage($request, $exception): string
     {
         $message = sprintf(
             '[%s] %s',
