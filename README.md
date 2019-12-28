@@ -20,13 +20,7 @@ composer require admad/cakephp-social-auth
 Load the plugin by running following command in terminal:
 
 ```
-bin/cake plugin load ADmad/SocialAuth -b -r
-```
-
-or by manually adding following line to your app's `config/bootstrap.php`:
-
-```php
-Plugin::load('ADmad/SocialAuth', ['bootstrap' => true, 'routes' => true]);
+bin/cake plugin load ADmad/SocialAuth
 ```
 
 ## Database
@@ -101,10 +95,8 @@ $middlewareQueue->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
             ],
         ],
     ],
-    // If you want to use CURL instead of CakePHP's Http Client set this to
-    // '\SocialConnect\Common\Http\Client\Curl' or another client instance that
-    // SocialConnect/Auth's Service class accepts.
-    'httpClient' => '\ADmad\SocialAuth\Http\Client',
+    // Http client class.
+    'httpClient' => \ADmad\SocialAuth\Http\Client::class,
     // Whether social connect errors should be logged. Default `true`.
     'logErrors' => true,
 ]));
@@ -204,7 +196,7 @@ In case of authentication failure user is redirected back to login URL with
 
 Copyright
 ---------
-Copyright 2018 ADmad
+Copyright 2017-Present ADmad
 
 License
 -------
