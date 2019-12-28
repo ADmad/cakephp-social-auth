@@ -291,17 +291,12 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
             ])
             ->first();
 
-        $profile = $this->_patchProfile(
+        return $this->_patchProfile(
             $providerName,
             $identity,
             $accessToken,
             $profile ?: null
         );
-        if ($profile->isDirty()) {
-            $this->_saveProfile($profile);
-        }
-
-        return $profile;
     }
 
     /**
