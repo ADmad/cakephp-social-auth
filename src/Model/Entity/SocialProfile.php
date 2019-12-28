@@ -14,6 +14,9 @@ use Cake\ORM\Entity;
 
 class SocialProfile extends Entity
 {
+    /**
+     * @var array
+     */
     protected $_accessible = [
         '*' => true,
         'id' => false,

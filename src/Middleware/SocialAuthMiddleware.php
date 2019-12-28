@@ -13,7 +13,6 @@ namespace ADmad\SocialAuth\Middleware;
 use Cake\Core\Configure;
 use Cake\Core\InstanceConfigTrait;
 use Cake\Datasource\EntityInterface;
-use Cake\Datasource\ModelAwareTrait;
 use Cake\Event\EventDispatcherInterface;
 use Cake\Event\EventDispatcherTrait;
 use Cake\Event\EventManager;
@@ -21,7 +20,9 @@ use Cake\Http\Client;
 use Cake\Http\Response;
 use Cake\Http\ServerRequest;
 use Cake\Log\Log;
+use Cake\ORM\Locator\LocatorAwareTrait;
 use Cake\Routing\Router;
+use Cake\Utility\Hash;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -42,7 +43,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
 {
     use EventDispatcherTrait;
     use InstanceConfigTrait;
-    use ModelAwareTrait;
+    use LocatorAwareTrait;
 
     /**
      * The query string key used for remembering the referrered page when
@@ -112,14 +113,14 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
     /**
      * User model instance.
      *
-     * @var \Cake\ORM\Table|null
+     * @var \Cake\ORM\Table
      */
     protected $_userModel;
 
     /**
      * Profile model instance.
      *
-     * @var \Cake\ORM\Table|null
+     * @var \Cake\ORM\Table
      */
     protected $_profileModel;
 
@@ -161,10 +162,12 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      */
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        $action = $request->getParam('action');
+        $params = $request->getAttribute('params');
+        $action = Hash::get($params, 'action');
 
-        if ($request->getParam('plugin') !== 'ADmad/SocialAuth'
-            || $request->getParam('controller') !== 'Auth'
+        if (
+            Hash::get($params, 'plugin') !== 'ADmad/SocialAuth'
+            || Hash::get($params, 'controller') !== 'Auth'
             || !in_array($action, ['login', 'callback'], true)
         ) {
             return $handler->handle($request);
@@ -250,10 +253,10 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      */
     protected function _setupModelInstances()
     {
-        $this->_profileModel = $this->loadModel($this->getConfig('profileModel'));
+        $this->_profileModel = $this->getTableLocator()->get($this->getConfig('profileModel'));
         $this->_profileModel->belongsTo($this->getConfig('userModel'));
 
-        $this->_userModel = $this->loadModel($this->getConfig('userModel'));
+        $this->_userModel = $this->getTableLocator()->get($this->getConfig('userModel'));
     }
 
     /**
@@ -508,7 +511,8 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
 
         /** @var string $redirectUrl */
         $redirectUrl = $request->getQuery(static::QUERY_STRING_REDIRECT);
-        if (empty($redirectUrl)
+        if (
+            empty($redirectUrl)
             || substr($redirectUrl, 0, 1) !== '/'
             || substr($redirectUrl, 0, 2) === '//'
         ) {
