@@ -90,7 +90,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
         'fields' => [
             'password' => 'password',
         ],
-        'sessionKey' => 'Auth.User',
+        'sessionKey' => 'Auth',
         'getUserCallback' => 'getUser',
         'serviceConfig' => [],
         'logErrors' => true,
