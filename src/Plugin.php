@@ -18,17 +18,27 @@ use Cake\Routing\RouteBuilder;
 
 class Plugin extends BasePlugin
 {
+    /**
+     * @param \Cake\Core\PluginApplicationInterface $app Application instance.
+     *
+     * @return void
+     */
     public function bootstrap(PluginApplicationInterface $app): void
     {
         TypeFactory::map('social-auth.serialized', SerializedType::class);
     }
 
+    /**
+     * @param \Cake\Routing\RouteBuilder $routes Routes builder instance.
+     *
+     * @return void
+     */
     public function routes(RouteBuilder $routes): void
     {
         $routes->scope(
             '/social-auth',
             ['plugin' => 'ADmad/SocialAuth', 'controller' => 'Auth'],
-            function ($routes) {
+            function (RouteBuilder $routes) {
                 $routes->connect(
                     '/login/:provider',
                     ['action' => 'login'],

@@ -1,30 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit
-    bootstrap="./tests/bootstrap.php"
+    bootstrap="tests/bootstrap.php"
     colors="true"
     stopOnFailure="false"
     >
 
     <testsuites>
-        <testsuite name="ADmad\SocialAuth Test Cases">
-            <directory>./tests/</directory>
+        <testsuite name="social-auth">
+            <directory>tests/</directory>
         </testsuite>
     </testsuites>
 
     <!-- Setup a listener for fixtures -->
     <listeners>
         <listener
-        class="\Cake\TestSuite\Fixture\FixtureInjector"
-        file="./vendor/cakephp/cakephp/src/TestSuite/Fixture/FixtureInjector.php">
+        class="Cake\TestSuite\Fixture\FixtureInjector">
             <arguments>
-                <object class="\Cake\TestSuite\Fixture\FixtureManager" />
+                <object class="Cake\TestSuite\Fixture\FixtureManager"/>
             </arguments>
         </listener>
     </listeners>
 
     <filter>
         <whitelist>
-            <directory suffix=".php">./src/</directory>
+            <directory suffix=".php">src/</directory>
         </whitelist>
     </filter>
 </phpunit>
