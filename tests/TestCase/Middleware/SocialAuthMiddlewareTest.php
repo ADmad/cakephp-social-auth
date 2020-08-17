@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace ADmad\SocialAuth\Test\TestCase\Middleware;
@@ -38,23 +39,23 @@ class SocialAuthMiddlewareTest extends TestCase
     public function testLoginUrl()
     {
         $request = ServerRequestFactory::fromGlobals([
-            'REQUEST_URI' => '/social-auth/login/facebook',
+            'REQUEST_URI'    => '/social-auth/login/facebook',
             'REQUEST_METHOD' => 'POST',
         ]);
         $request = $request->withAttribute('params', [
-            'plugin' => 'ADmad/SocialAuth',
+            'plugin'     => 'ADmad/SocialAuth',
             'controller' => 'Auth',
-            'action' => 'login',
-            'provider' => 'facebook',
+            'action'     => 'login',
+            'provider'   => 'facebook',
         ]);
 
         $middleware = new SocialAuthMiddleware([
             'serviceConfig' => [
                 'provider' => [
                     'facebook' => [
-                        'applicationId' => '<application id>',
+                        'applicationId'     => '<application id>',
                         'applicationSecret' => '<application secret>',
-                        'scope' => [
+                        'scope'             => [
                             'email',
                         ],
                         'fields' => [
@@ -79,10 +80,10 @@ class SocialAuthMiddlewareTest extends TestCase
             'REQUEST_URI' => '/social-auth/login/facebook',
         ]);
         $request = $request->withAttribute('params', [
-            'plugin' => 'ADmad/SocialAuth',
+            'plugin'     => 'ADmad/SocialAuth',
             'controller' => 'Auth',
-            'action' => 'login',
-            'provider' => 'facebook',
+            'action'     => 'login',
+            'provider'   => 'facebook',
         ]);
 
         $class = MethodNotAllowedException::class;
