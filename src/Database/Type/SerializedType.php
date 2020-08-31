@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -19,7 +20,7 @@ class SerializedType extends BaseType
     /**
      * Convert a value data into a serialized string.
      *
-     * @param mixed $value The value to convert.
+     * @param mixed                          $value  The value to convert.
      * @param \Cake\Database\DriverInterface $driver The driver instance to convert with.
      *
      * @return string|null
@@ -36,7 +37,7 @@ class SerializedType extends BaseType
     /**
      * Convert string values to PHP data structure.
      *
-     * @param mixed $value The value to convert.
+     * @param mixed                          $value  The value to convert.
      * @param \Cake\Database\DriverInterface $driver The driver instance to convert with.
      *
      * @return string|null|array
@@ -53,7 +54,7 @@ class SerializedType extends BaseType
     /**
      * Get the correct PDO binding type for string data.
      *
-     * @param mixed $value The value being bound.
+     * @param mixed                          $value  The value being bound.
      * @param \Cake\Database\DriverInterface $driver The driver.
      *
      * @return int

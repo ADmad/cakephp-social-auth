@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -42,12 +43,12 @@ class Plugin extends BasePlugin
                 $routes->connect(
                     '/login/:provider',
                     ['action' => 'login'],
-                    ['pass' => ['provider']]
+                    ['pass'   => ['provider']]
                 );
                 $routes->connect(
                     '/callback/:provider',
                     ['action' => 'callback'],
-                    ['pass' => ['provider']]
+                    ['pass'   => ['provider']]
                 );
                 $routes->connect(
                     '/callback',
