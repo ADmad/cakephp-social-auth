@@ -97,8 +97,6 @@ $middlewareQueue->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
             ],
         ],
     ],
-    // Http client class.
-    'httpClient' => \ADmad\SocialAuth\Http\Client::class,
     // Whether social connect errors should be logged. Default `true`.
     'logErrors' => true,
 ]));
