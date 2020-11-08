@@ -194,6 +194,37 @@ In case of authentication failure user is redirected back to login URL with
   a user has been authenticated through provider but your finder has condition
   to not return inactivate user.
 
+### Event Listener
+
+To set up a listener for the `SocialAuth.afterIdentify` event, you can for example
+add this to your `UsersTable::initialize()` method:
+```php
+use Cake\Event\EventManager;
+
+// at the end of the initialize() method
+EventManager::instance()->on('SocialAuth.afterIdentify', [$this, 'updateUser']);
+```
+
+Then create such method in this table class:
+```php
+    /**
+     * @param \Cake\Event\EventInterface $event
+     * @param \Cake\Datasource\EntityInterface $user
+     * @return \Cake\Datasource\EntityInterface
+     */
+    public function updateUser(EventInterface $event, $user)
+    {       
+        // You can access the profile through $user->profile->...
+
+        // Additional mapping operations
+        // $user->last_login = date('Y-m-d H:i:s');
+
+        $this->saveOrFail($user);
+
+        return $user;
+    }
+```
+
 Copyright
 ---------
 Copyright 2017-Present ADmad

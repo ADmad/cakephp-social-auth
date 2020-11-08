@@ -21,7 +21,6 @@ class SerializedType extends BaseType
      *
      * @param mixed $value The value to convert.
      * @param \Cake\Database\DriverInterface $driver The driver instance to convert with.
-     *
      * @return string|null
      */
     public function toDatabase($value, DriverInterface $driver)
@@ -38,7 +37,6 @@ class SerializedType extends BaseType
      *
      * @param mixed $value The value to convert.
      * @param \Cake\Database\DriverInterface $driver The driver instance to convert with.
-     *
      * @return string|null|array
      */
     public function toPHP($value, DriverInterface $driver)
@@ -55,7 +53,6 @@ class SerializedType extends BaseType
      *
      * @param mixed $value The value being bound.
      * @param \Cake\Database\DriverInterface $driver The driver.
-     *
      * @return int
      */
     public function toStatement($value, DriverInterface $driver)
@@ -71,7 +68,6 @@ class SerializedType extends BaseType
      * Marshalls request data into a serialization compatible structure.
      *
      * @param mixed $value The value to convert.
-     *
      * @return mixed Converted value.
      */
     public function marshal($value)

@@ -1,5 +1,7 @@
 parameters:
-    level: 6
+    level: 8
     checkMissingIterableValueType: false
-    autoload_files:
+    bootstrapFiles:
         - tests/bootstrap.php
+    ignoreErrors:
+        - '#Parameter \#1 \$function of function call_user_func expects callable\(\): mixed, array\(Cake\\ORM\\Table, mixed\) given.#'
