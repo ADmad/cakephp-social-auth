@@ -209,17 +209,15 @@ Then create such method in this table class:
 ```php
     /**
      * @param \Cake\Event\EventInterface $event
-     *
-     * @return \App\Model\Entity\User
+     * @param \Cake\Datasource\EntityInterface $user
+     * @return \Cake\Datasource\EntityInterface
      */
-    public function updateUser(EventInterface $event): User
-    {
-        /** @var \App\Model\Entity\User $user */
-        $user = $event->getData()['user'];
-        
+    public function updateUser(EventInterface $event, $user)
+    {       
         // You can access the profile through $user->profile->...
 
         // Additional mapping operations
+        // $user->last_login = date('Y-m-d H:i:s');
 
         $this->saveOrFail($user);
 
