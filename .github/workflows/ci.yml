@@ -76,8 +76,13 @@ jobs:
     - name: Composer Install
       run: composer install
 
-    - name: Run checks
-      run: |
-        vendor/bin/phpcs -q --report=checkstyle --standard=vendor/cakephp/cakephp-codesniffer/CakePHP src/ tests/ | cs2pr
-        psalm --output-format=github
-        phpstan analyse
+    - name: Run phpcs
+      run: vendor/bin/phpcs -q --report=checkstyle --standard=vendor/cakephp/cakephp-codesniffer/CakePHP src/ tests/ | cs2pr
+
+    - name: Run psalm
+      if: success() || failure()
+      run: psalm --output-format=github
+
+    - name: Run psalm
+      if: success() || failure()
+      run: phpstan analyse
