@@ -13,7 +13,7 @@ use Cake\ORM\Entity;
 class SocialProfile extends Entity
 {
     protected $_accessible = [
-        '*' => true,
+        '*'  => true,
         'id' => false,
     ];
 }

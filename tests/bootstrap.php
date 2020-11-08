@@ -10,7 +10,7 @@ $findRoot = function ($root) {
     do {
         $lastRoot = $root;
         $root = dirname($root);
-        if (is_dir($root . '/vendor/cakephp/cakephp')) {
+        if (is_dir($root.'/vendor/cakephp/cakephp')) {
             return $root;
         }
     } while ($root !== $lastRoot);
@@ -22,10 +22,10 @@ unset($findRoot);
 
 chdir($root);
 
-require $root . '/vendor/cakephp/cakephp/tests/bootstrap.php';
+require $root.'/vendor/cakephp/cakephp/tests/bootstrap.php';
 
-if (file_exists($root . '/config/bootstrap.php')) {
-    require $root . '/config/bootstrap.php';
+if (file_exists($root.'/config/bootstrap.php')) {
+    require $root.'/config/bootstrap.php';
 }
 
 define('PLUGIN_ROOT', $root);

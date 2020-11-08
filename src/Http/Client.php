@@ -35,11 +35,11 @@ class Client extends SocialConnectClient
     /**
      * Request specify url.
      *
-     * @param string $url Request URL.
-     * @param array $parameters Request parameters.
-     * @param string $method Request method.
-     * @param array $headers Request headers.
-     * @param array $options Unused.
+     * @param string $url        Request URL.
+     * @param array  $parameters Request parameters.
+     * @param string $method     Request method.
+     * @param array  $headers    Request headers.
+     * @param array  $options    Unused.
      *
      * @return \SocialConnect\Common\Http\Response
      */
@@ -85,7 +85,7 @@ class Client extends SocialConnectClient
 
         return new Response(
             $response->getStatusCode(),
-            (string)$response->getBody(),
+            (string) $response->getBody(),
             $response->getHeaders()
         );
     }

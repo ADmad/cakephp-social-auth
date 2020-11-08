@@ -14,12 +14,12 @@ Router::plugin(
         $routes->connect(
             '/login/:provider',
             ['controller' => 'Auth', 'action' => 'login'],
-            ['pass' => ['provider']]
+            ['pass'       => ['provider']]
         );
         $routes->connect(
             '/callback/:provider',
             ['controller' => 'Auth', 'action' => 'callback'],
-            ['pass' => ['provider']]
+            ['pass'       => ['provider']]
         );
         $routes->connect(
             '/callback',
