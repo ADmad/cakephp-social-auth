@@ -19,8 +19,12 @@ use Cake\Routing\RouteBuilder;
 class Plugin extends BasePlugin
 {
     /**
+     * @var bool
+     */
+    protected $consoleEnabled = false;
+
+    /**
      * @param \Cake\Core\PluginApplicationInterface $app Application instance.
-     *
      * @return void
      */
     public function bootstrap(PluginApplicationInterface $app): void
@@ -30,7 +34,6 @@ class Plugin extends BasePlugin
 
     /**
      * @param \Cake\Routing\RouteBuilder $routes Routes builder instance.
-     *
      * @return void
      */
     public function routes(RouteBuilder $routes): void

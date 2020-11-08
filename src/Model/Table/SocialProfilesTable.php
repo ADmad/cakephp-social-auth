@@ -27,7 +27,6 @@ use Cake\ORM\Table;
  * @method \ADmad\SocialAuth\Model\Entity\SocialProfile[]|\Cake\Datasource\ResultSetInterface saveManyOrFail(iterable $entities, $options = [])
  * @method \ADmad\SocialAuth\Model\Entity\SocialProfile[]|\Cake\Datasource\ResultSetInterface|false deleteMany(iterable $entities, $options = [])
  * @method \ADmad\SocialAuth\Model\Entity\SocialProfile[]|\Cake\Datasource\ResultSetInterface deleteManyOrFail(iterable $entities, $options = [])
- *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class SocialProfilesTable extends Table
@@ -36,7 +35,6 @@ class SocialProfilesTable extends Table
      * Initialize table.
      *
      * @param array $config Configuration
-     *
      * @return void
      */
     public function initialize(array $config): void
@@ -50,7 +48,6 @@ class SocialProfilesTable extends Table
      * Set custom type of "access_token" column.
      *
      * @param \Cake\Database\Schema\TableSchemaInterface $schema The table definition fetched from database.
-     *
      * @return \Cake\Database\Schema\TableSchemaInterface
      */
     protected function _initializeSchema(TableSchemaInterface $schema): TableSchemaInterface
