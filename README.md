@@ -216,10 +216,10 @@ Then create such method in this table class:
     {
         /** @var \App\Model\Entity\User $user */
         $user = $event->getData()['user'];
-        /** @var \ADmad\SocialAuth\Model\Entity\SocialProfile $profile */
-        $profile = $event->getData()['profile'];
+        
+        // You can access the profile through $user->profile->...
 
-        // additional mapping operations
+        // Additional mapping operations
 
         $this->saveOrFail($user);
 
