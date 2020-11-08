@@ -306,15 +306,14 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
     {
         $user = null;
 
-        if ($profile->get('user_id')) {
-            /** @var string $userPkField */
-            $userPkField = $this->_userModel->getPrimaryKey();
-            $userPkField = $this->_userModel->aliasField($userPkField);
+        /** @var string $userPkField */
+        $userPkField = $this->_userModel->getPrimaryKey();
 
+        if ($profile->get('user_id')) {
             /** @var \Cake\Datasource\EntityInterface $user */
             $user = $this->_userModel->find()
                 ->where([
-                    $userPkField => $profile->get('user_id'),
+                    $this->_userModel->aliasField($userPkField) => $profile->get('user_id'),
                 ])
                 ->find($this->getConfig('finder'))
                 ->first();
@@ -328,7 +327,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
             }
 
             $user = $this->_getUserEntity($profile, $session);
-            $profile->set('user_id', $user->id);
+            $profile->set('user_id', $user->get($userPkField));
         }
 
         if ($profile->isDirty()) {
@@ -456,6 +455,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
             $serviceConfig = Configure::consume('SocialAuth');
         }
 
+        /** @psalm-suppress PossiblyInvalidArrayOffset */
         if (!isset($serviceConfig['redirectUri'])) {
             $serviceConfig['redirectUri'] = Router::url([
                 'plugin' => 'ADmad/SocialAuth',
@@ -473,6 +473,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
             new StreamFactory()
         );
 
+        /** @psalm-suppress PossiblyNullArgument */
         $this->_service = new Service(
             $httpStack,
             $this->_session ?: new Session(),
@@ -545,9 +546,9 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
             $message .= "\nReferer URL: " . $referer;
         }
 
-        if ($exception instanceof InvalidResponse && $exception->getResponse()) {
+        if ($exception instanceof InvalidResponse) {
             $response = $exception->getResponse();
-            $message .= "\nProvider Response: " . ($response ? $response->getBody() : 'n/a');
+            $message .= "\nProvider Response: " . ($response ? (string)$response->getBody() : 'n/a');
         }
 
         $message .= "\nStack Trace:\n" . $exception->getTraceAsString() . "\n\n";
