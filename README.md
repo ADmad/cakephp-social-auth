@@ -214,7 +214,7 @@ Then create such method in this table class:
      */
     public function updateUser(EventInterface $event, $user)
     {       
-        // You can access the profile through $user->profile->...
+        // You can access the profile through $user->social_profile->...
 
         // Additional mapping operations
         // $user->last_login = date('Y-m-d H:i:s');
