@@ -225,7 +225,8 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
 
         $user->unset($config['fields']['password']);
 
-        $event = $this->dispatchEvent(self::EVENT_AFTER_IDENTIFY, ['user' => $user]);
+        $data = ['user' => $user, 'session' => $request->getSession()];
+        $event = $this->dispatchEvent(self::EVENT_AFTER_IDENTIFY, $data);
         $result = $event->getResult();
         if ($result !== null) {
             $user = $event->getResult();
