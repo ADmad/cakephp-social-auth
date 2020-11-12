@@ -213,7 +213,7 @@ Then create such method in this Table class:
      * @param \Cake\Http\Session $session
      * @return \App\Model\Entity\User
      */
-    public function afterIdentify(EventInterface $event, $user, $session)
+    public function afterIdentify(EventInterface $event, User $user, Session $session)
     {
         // You can access the profile through $user->social_profile->...
 
@@ -242,7 +242,7 @@ For successful login and flash you can use the above event and manually write to
      * @param \App\Model\Entity\User $user
      * @param \Cake\Http\Session $session
      *
-     * @return null
+     * @return \App\Model\Entity\User
      */
     public function afterIdentify(EventInterface $event, User $user, Session $session)
     {
@@ -255,7 +255,9 @@ For successful login and flash you can use the above event and manually write to
         ];
         $session->write('Flash.flash', $messages);
 
-        return null;
+        // ... (last_login timestamp update etc)
+
+        return $user;
     }
 ```
 Since we redirect afterwards, we must write to the session here.
