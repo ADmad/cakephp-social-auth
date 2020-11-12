@@ -178,9 +178,9 @@ public function getUser(\Cake\Datasource\EntityInterface $profile, \Cake\Http\Se
 ```
 
 Upon successful authentication an `SocialAuth.afterIdentify` event is
-dispatched with the user entity. You can setup a listener for this event to
+dispatched with the user entity and session object. You can setup a listener for this event to
 perform required tasks after a successful authentication. The listener can
-optionally return an user entity as event result.
+optionally return a user entity as event result.
 
 The user identity is persisted to session under key you have specified in
 middleware config (`Auth.User` by default).
@@ -202,18 +202,19 @@ add this to your `UsersTable::initialize()` method:
 use Cake\Event\EventManager;
 
 // at the end of the initialize() method
-EventManager::instance()->on('SocialAuth.afterIdentify', [$this, 'updateUser']);
+EventManager::instance()->on('SocialAuth.afterIdentify', [$this, 'afterIdentify']);
 ```
 
-Then create such method in this table class:
+Then create such method in this Table class:
 ```php
     /**
      * @param \Cake\Event\EventInterface $event
-     * @param \Cake\Datasource\EntityInterface $user
-     * @return \Cake\Datasource\EntityInterface
+     * @param \App\Model\Entity\User $user
+     * @param \Cake\Http\Session $session
+     * @return \App\Model\Entity\User
      */
-    public function updateUser(EventInterface $event, $user)
-    {       
+    public function afterIdentify(EventInterface $event, $user, $session)
+    {
         // You can access the profile through $user->social_profile->...
 
         // Additional mapping operations
@@ -224,6 +225,41 @@ Then create such method in this table class:
         return $user;
     }
 ```
+
+### Flash messages
+You can use the existence of this `error` query string for a flash message feedback:
+```php
+if ($this->request->getQuery('error')) {
+    $this->Flash->error(__('Login failed. Please try again.'));
+}
+```
+With [Flash plugin](https://github.com/dereuromark/cakephp-flash) you can also use `transientError()` here to avoid session usage.
+
+For successful login and flash you can use the above event and manually write to the session:
+```php
+    /**
+     * @param \Cake\Event\EventInterface $event
+     * @param \App\Model\Entity\User $user
+     * @param \Cake\Http\Session $session
+     *
+     * @return null
+     */
+    public function afterIdentify(EventInterface $event, User $user, Session $session)
+    {
+        $messages = (array)$session->read('Flash.flash');
+        $messages[] = [
+            'message' => __('You are now logged in'),
+            'key' => 'flash',
+            'element' => 'flash/success',
+            'params' => [],
+        ];
+        $session->write('Flash.flash', $messages);
+
+        return null;
+    }
+```
+Since we redirect afterwards, we must write to the session here.
+
 
 Copyright
 ---------
