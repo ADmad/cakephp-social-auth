@@ -48,13 +48,45 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
     /**
      * The query string key used for remembering the referrered page when
      * getting redirected to login.
+     *
+     * @var string
      */
     public const QUERY_STRING_REDIRECT = 'redirect';
 
     /**
      * The name of the event that is fired after user identification.
+     *
+     * @var string
      */
     public const EVENT_AFTER_IDENTIFY = 'SocialAuth.afterIdentify';
+
+    /**
+     * The name of the event that is fired before redirection after authentication success/failure
+     *
+     * @var string
+     */
+    public const EVENT_BEFORE_REDIRECT = 'SocialAuth.beforeRedirect';
+
+    /**
+     * Auth success status.
+     *
+     * @var string
+     */
+    public const AUTH_STATUS_SUCCESS = 'success';
+
+    /**
+     * Auth provider failure status.
+     *
+     * @var string
+     */
+    public const AUTH_STATUS_PROVIDER_FAILURE = 'provider_failure';
+
+    /**
+     * Auth finder failure status.
+     *
+     * @var string
+     */
+    public const AUTH_STATUS_FINDER_FAILURE = 'finder_failure';
 
     /**
      * Default config.
@@ -211,15 +243,19 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
 
         $profile = $this->_getProfile($providerName, $request);
         if (!$profile) {
+            $redirectUrl = $this->_triggerBeforeRedirect($request, $config['loginUrl'], $this->_error);
+
             return $response->withLocation(
-                Router::url($config['loginUrl'], true) . '?error=' . $this->_error
+                Router::url($redirectUrl, true)
             );
         }
 
         $user = $this->_getUser($profile, $request->getSession());
         if (!$user) {
+            $redirectUrl = $this->_triggerBeforeRedirect($request, $config['loginUrl'], $this->_error);
+
             return $response->withLocation(
-                Router::url($config['loginUrl'], true) . '?error=' . $this->_error
+                Router::url($config['loginUrl'], true)
             );
         }
 
@@ -237,8 +273,10 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
 
         $request->getSession()->write($config['sessionKey'], $user);
 
+        $redirectUrl = $this->_triggerBeforeRedirect($request, $this->_getRedirectUrl($request));
+
         return $response->withLocation(
-            Router::url($this->_getRedirectUrl($request), true)
+            Router::url($redirectUrl, true)
         );
     }
 
@@ -269,7 +307,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
             $accessToken = $provider->getAccessTokenByRequestParameters($request->getQueryParams());
             $identity = $provider->getIdentity($accessToken);
         } catch (SocialConnectException $e) {
-            $this->_error = 'provider_failure';
+            $this->_error = self::AUTH_STATUS_PROVIDER_FAILURE;
 
             if ($this->getConfig('logErrors')) {
                 Log::error($this->_getLogMessage($request, $e));
@@ -321,7 +359,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
 
         if (!$user) {
             if ($profile->get('user_id')) {
-                $this->_error = 'finder_failure';
+                $this->_error = self::AUTH_STATUS_FINDER_FAILURE;
 
                 return null;
             }
@@ -522,6 +560,33 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
         }
 
         return $this->getConfig('loginRedirect');
+    }
+
+    /**
+     * Trigger "beforeRedirect" event.
+     *
+     * @param \Psr\Http\Message\ServerRequestInterface $request Request instance.
+     * @param string|array $redirectUrl Redirect URL.
+     * @param string $status Auth status.
+     * @return string|array
+     */
+    protected function _triggerBeforeRedirect(
+        $request,
+        $redirectUrl,
+        string $status = self::AUTH_STATUS_SUCCESS
+    ) {
+        $event = $this->dispatchEvent(self::EVENT_BEFORE_REDIRECT, [
+            'redirectUrl' => $redirectUrl,
+            'status' => $status,
+            'request' => $request,
+        ]);
+
+        $result = $event->getResult();
+        if ($result !== null) {
+            $redirectUrl = $result;
+        }
+
+        return $redirectUrl;
     }
 
     /**
