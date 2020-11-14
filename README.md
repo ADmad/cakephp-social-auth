@@ -180,6 +180,10 @@ public function getUser(EntityInterface $profile, Session $session)
 }
 ```
 
+Instead of adding a `getUser` method to your `UsersTable` you can also setup a
+listener for the `SocialAuth.createUser` callback and return a `User` entity from
+the listener callback, in a similar way as shown above.
+
 Upon successful authentication the user identity is persisted to the session
 under the key you have specified in the middleware config (`Auth.User` by default).
 
@@ -189,6 +193,13 @@ login or to the URL specified in `loginRedirect` config.
 In case of authentication failure the user is redirected back to login URL.
 
 ### Events
+
+#### SocialAuth.createUser
+
+After authentication from the social auth provider if a related use record is not
+found then `SocialAuth.createUser` is triggered. As an alternative to adding a
+new `createUser()` method in your `UsersTable` as mentioned above you can instead
+use this event to return an entity for a new user.
 
 #### SocialAuth.afterIdentify
 
@@ -200,7 +211,7 @@ event result.
 #### SocialAuth.beforeRedirect
 
 After the completion of authentication process before the user is redirected
-to required URL a `SocialAuth.beforeRedirect` event is trigerred. This event
+to required URL a `SocialAuth.beforeRedirect` event is triggered. This event
 for e.g. can be used to set a visual notification like flash message to indicate
 the result of the authentication process to the user.
 
@@ -212,7 +223,10 @@ Here's an e.g. listener with callbacks to the above method:
 namespace App\Event;
 
 use ADmad\SocialAuth\Middleware\SocialAuthMiddleware;
+use Cake\Datasource\EntityInterface;
+use Cake\Event\EventInterface;
 use Cake\Event\EventListenerInterface;
+use Cake\Http\ServerRequest;
 use Cake\ORM\Locator\LocatorAwareTrait;
 
 class SocialAuthListener implements EventListenerInterface
@@ -222,15 +236,18 @@ class SocialAuthListener implements EventListenerInterface
     public function implementedEvents(): array
     {
         return [
-            'SocialAuth.afterIdentify' => 'afterIdentify',
-            'SocialAuth.beforeRedirect' => 'beforeRedirect',
+            SocialAuthMiddleware::EVENT_AFTER_IDENTIFY => 'afterIdentify',
+            SocialAuthMiddleware::EVENT_BEFORE_REDIRECT => 'beforeRedirect',
+            // Uncomment below if you want to use the event listener to return
+            // an entity for a new user instead of directly using `createUser()` table method.
+            // SocialAuthMiddleware::EVENT_CREATE_USER => 'createUser',
         ];
     }
 
     public function afterIdentify(EventInterface $event, EntityInterface $user): EntityInterface
     {
         // Update last login time
-        $user->last_login = date('Y-m-d H:i:s');
+        $user->set('last_login', date('Y-m-d H:i:s'));
 
         // You can access the profile using $user->social_profile
 
@@ -271,9 +288,16 @@ class SocialAuthListener implements EventListenerInterface
                 break;
         }
 
-        $request->session->write('Flash.flash', $messages);
+        $request->getSession()->write('Flash.flash', $messages);
 
         // You can return a modified $rediretUrl if needed.
+    }
+
+    public function createUser(EventInterface $event, EntityInterface $profile, Session $session): EventInterface
+    {
+        // Create and save entity for new user as shown in "createUser()" method above
+
+        return $user;
     }
 ```
 

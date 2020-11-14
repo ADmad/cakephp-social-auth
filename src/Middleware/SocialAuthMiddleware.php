@@ -19,6 +19,7 @@ use Cake\Event\EventManager;
 use Cake\Http\Client;
 use Cake\Http\Response;
 use Cake\Http\ServerRequest;
+use Cake\Http\Session as CakeSession;
 use Cake\Log\Log;
 use Cake\ORM\Locator\LocatorAwareTrait;
 use Cake\Routing\Router;
@@ -34,7 +35,7 @@ use SocialConnect\Common\Exception as SocialConnectException;
 use SocialConnect\Common\HttpStack;
 use SocialConnect\Provider\AccessTokenInterface;
 use SocialConnect\Provider\Exception\InvalidResponse;
-use SocialConnect\Provider\Session\Session;
+use SocialConnect\Provider\Session\Session as SocialConnectSession;
 use SocialConnect\Provider\Session\SessionInterface;
 use Zend\Diactoros\RequestFactory;
 use Zend\Diactoros\StreamFactory;
@@ -52,6 +53,13 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      * @var string
      */
     public const QUERY_STRING_REDIRECT = 'redirect';
+
+    /**
+     * The name of the event that is fired for a new user.
+     *
+     * @var string
+     */
+    public const EVENT_CREATE_USER = 'SocialAuth.createUser';
 
     /**
      * The name of the event that is fired after user identification.
@@ -340,7 +348,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      * @return \Cake\Datasource\EntityInterface|null User array or entity
      *   on success, null on failure.
      */
-    protected function _getUser(EntityInterface $profile, $session): ?EntityInterface
+    protected function _getUser(EntityInterface $profile, CakeSession $session): ?EntityInterface
     {
         $user = null;
 
@@ -448,14 +456,24 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      * @param \Cake\Http\Session $session Session instance.
      * @return \Cake\Datasource\EntityInterface User entity.
      */
-    protected function _getUserEntity(EntityInterface $profile, $session): EntityInterface
+    protected function _getUserEntity(EntityInterface $profile, CakeSession $session): EntityInterface
     {
-        $callbackMethod = $this->getConfig('getUserCallback');
+        $event = $this->dispatchEvent(self::EVENT_CREATE_USER, [
+            'profile' => $profile,
+            'session' => $session,
+        ]);
 
-        $user = call_user_func([$this->_userModel, $callbackMethod], $profile, $session);
+        $user = $event->getResult();
+        if ($user === null) {
+            $user = call_user_func(
+                [$this->_userModel, $this->getConfig('getUserCallback')],
+                $profile,
+                $session
+            );
+        }
 
         if (!($user instanceof EntityInterface)) {
-            throw new RuntimeException('"getUserCallback" method must return a user entity.');
+            throw new RuntimeException('The callback for new user must return an entity.');
         }
 
         return $user;
@@ -514,7 +532,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
         /** @psalm-suppress PossiblyNullArgument */
         $this->_service = new Service(
             $httpStack,
-            $this->_session ?: new Session(),
+            $this->_session ?: new SocialConnectSession(),
             $serviceConfig
         );
 
