@@ -19,6 +19,7 @@ use Cake\Event\EventManager;
 use Cake\Http\Client;
 use Cake\Http\Response;
 use Cake\Http\ServerRequest;
+use Cake\Http\Session as CakeSession;
 use Cake\Log\Log;
 use Cake\ORM\Locator\LocatorAwareTrait;
 use Cake\Routing\Router;
@@ -34,7 +35,7 @@ use SocialConnect\Common\Exception as SocialConnectException;
 use SocialConnect\Common\HttpStack;
 use SocialConnect\Provider\AccessTokenInterface;
 use SocialConnect\Provider\Exception\InvalidResponse;
-use SocialConnect\Provider\Session\Session;
+use SocialConnect\Provider\Session\Session as SocialConnectSession;
 use SocialConnect\Provider\Session\SessionInterface;
 use Zend\Diactoros\RequestFactory;
 use Zend\Diactoros\StreamFactory;
@@ -48,13 +49,52 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
     /**
      * The query string key used for remembering the referrered page when
      * getting redirected to login.
+     *
+     * @var string
      */
     public const QUERY_STRING_REDIRECT = 'redirect';
 
     /**
+     * The name of the event that is fired for a new user.
+     *
+     * @var string
+     */
+    public const EVENT_CREATE_USER = 'SocialAuth.createUser';
+
+    /**
      * The name of the event that is fired after user identification.
+     *
+     * @var string
      */
     public const EVENT_AFTER_IDENTIFY = 'SocialAuth.afterIdentify';
+
+    /**
+     * The name of the event that is fired before redirection after authentication success/failure
+     *
+     * @var string
+     */
+    public const EVENT_BEFORE_REDIRECT = 'SocialAuth.beforeRedirect';
+
+    /**
+     * Auth success status.
+     *
+     * @var string
+     */
+    public const AUTH_STATUS_SUCCESS = 'success';
+
+    /**
+     * Auth provider failure status.
+     *
+     * @var string
+     */
+    public const AUTH_STATUS_PROVIDER_FAILURE = 'provider_failure';
+
+    /**
+     * Auth finder failure status.
+     *
+     * @var string
+     */
+    public const AUTH_STATUS_FINDER_FAILURE = 'finder_failure';
 
     /**
      * Default config.
@@ -211,15 +251,19 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
 
         $profile = $this->_getProfile($providerName, $request);
         if (!$profile) {
+            $redirectUrl = $this->_triggerBeforeRedirect($request, $config['loginUrl'], $this->_error);
+
             return $response->withLocation(
-                Router::url($config['loginUrl'], true) . '?error=' . $this->_error
+                Router::url($redirectUrl, true)
             );
         }
 
         $user = $this->_getUser($profile, $request->getSession());
         if (!$user) {
+            $redirectUrl = $this->_triggerBeforeRedirect($request, $config['loginUrl'], $this->_error);
+
             return $response->withLocation(
-                Router::url($config['loginUrl'], true) . '?error=' . $this->_error
+                Router::url($config['loginUrl'], true)
             );
         }
 
@@ -237,8 +281,10 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
 
         $request->getSession()->write($config['sessionKey'], $user);
 
+        $redirectUrl = $this->_triggerBeforeRedirect($request, $this->_getRedirectUrl($request));
+
         return $response->withLocation(
-            Router::url($this->_getRedirectUrl($request), true)
+            Router::url($redirectUrl, true)
         );
     }
 
@@ -269,7 +315,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
             $accessToken = $provider->getAccessTokenByRequestParameters($request->getQueryParams());
             $identity = $provider->getIdentity($accessToken);
         } catch (SocialConnectException $e) {
-            $this->_error = 'provider_failure';
+            $this->_error = self::AUTH_STATUS_PROVIDER_FAILURE;
 
             if ($this->getConfig('logErrors')) {
                 Log::error($this->_getLogMessage($request, $e));
@@ -302,7 +348,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      * @return \Cake\Datasource\EntityInterface|null User array or entity
      *   on success, null on failure.
      */
-    protected function _getUser(EntityInterface $profile, $session): ?EntityInterface
+    protected function _getUser(EntityInterface $profile, CakeSession $session): ?EntityInterface
     {
         $user = null;
 
@@ -321,7 +367,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
 
         if (!$user) {
             if ($profile->get('user_id')) {
-                $this->_error = 'finder_failure';
+                $this->_error = self::AUTH_STATUS_FINDER_FAILURE;
 
                 return null;
             }
@@ -410,14 +456,24 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      * @param \Cake\Http\Session $session Session instance.
      * @return \Cake\Datasource\EntityInterface User entity.
      */
-    protected function _getUserEntity(EntityInterface $profile, $session): EntityInterface
+    protected function _getUserEntity(EntityInterface $profile, CakeSession $session): EntityInterface
     {
-        $callbackMethod = $this->getConfig('getUserCallback');
+        $event = $this->dispatchEvent(self::EVENT_CREATE_USER, [
+            'profile' => $profile,
+            'session' => $session,
+        ]);
 
-        $user = call_user_func([$this->_userModel, $callbackMethod], $profile, $session);
+        $user = $event->getResult();
+        if ($user === null) {
+            $user = call_user_func(
+                [$this->_userModel, $this->getConfig('getUserCallback')],
+                $profile,
+                $session
+            );
+        }
 
         if (!($user instanceof EntityInterface)) {
-            throw new RuntimeException('"getUserCallback" method must return a user entity.');
+            throw new RuntimeException('The callback for new user must return an entity.');
         }
 
         return $user;
@@ -476,7 +532,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
         /** @psalm-suppress PossiblyNullArgument */
         $this->_service = new Service(
             $httpStack,
-            $this->_session ?: new Session(),
+            $this->_session ?: new SocialConnectSession(),
             $serviceConfig
         );
 
@@ -522,6 +578,33 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
         }
 
         return $this->getConfig('loginRedirect');
+    }
+
+    /**
+     * Trigger "beforeRedirect" event.
+     *
+     * @param \Psr\Http\Message\ServerRequestInterface $request Request instance.
+     * @param string|array $redirectUrl Redirect URL.
+     * @param string $status Auth status.
+     * @return string|array
+     */
+    protected function _triggerBeforeRedirect(
+        $request,
+        $redirectUrl,
+        string $status = self::AUTH_STATUS_SUCCESS
+    ) {
+        $event = $this->dispatchEvent(self::EVENT_BEFORE_REDIRECT, [
+            'redirectUrl' => $redirectUrl,
+            'status' => $status,
+            'request' => $request,
+        ]);
+
+        $result = $event->getResult();
+        if ($result !== null) {
+            $redirectUrl = $result;
+        }
+
+        return $redirectUrl;
     }
 
     /**

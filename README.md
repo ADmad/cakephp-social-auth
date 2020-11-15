@@ -81,9 +81,9 @@ $middlewareQueue->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
                 ],
                 'options' => [
                     'identity.fields' => [
-                    'email',
-                    // To get a full list of all possible values, refer to
-                    // https://developers.facebook.com/docs/graph-api/reference/user
+                        'email',
+                        // To get a full list of all possible values, refer to
+                        // https://developers.facebook.com/docs/graph-api/reference/user
                     ],
                 ],
             ],
@@ -139,8 +139,11 @@ instance as argument and must return an entity for the user.
 
 ```php
 // src/Model/Table/UsersTable.php
+use \Cake\Datasource\EntityInterface;
+use \Cake\Http\Session;
 
-public function getUser(\Cake\Datasource\EntityInterface $profile, \Cake\Http\Session $session) {
+public function getUser(EntityInterface $profile, Session $session)
+{
     // Make sure here that all the required fields are actually present
     if (empty($profile->email)) {
         throw new \RuntimeException('Could not find email in social profile.');
@@ -177,52 +180,136 @@ public function getUser(\Cake\Datasource\EntityInterface $profile, \Cake\Http\Se
 }
 ```
 
-Upon successful authentication an `SocialAuth.afterIdentify` event is
+Instead of adding a `getUser` method to your `UsersTable` you can also setup a
+listener for the `SocialAuth.createUser` callback and return a `User` entity from
+the listener callback, in a similar way as shown above.
+
+Upon successful authentication the user identity is persisted to the session
+under the key you have specified in the middleware config (`Auth.User` by default).
+
+After that the user is redirected to protected page they tried to access before
+login or to the URL specified in `loginRedirect` config.
+
+In case of authentication failure the user is redirected back to login URL.
+
+### Events
+
+#### SocialAuth.createUser
+
+After authentication from the social auth provider if a related use record is not
+found then `SocialAuth.createUser` is triggered. As an alternative to adding a
+new `createUser()` method in your `UsersTable` as mentioned above you can instead
+use this event to return an entity for a new user.
+
+#### SocialAuth.afterIdentify
+
+Upon successful authentication a `SocialAuth.afterIdentify` event is
 dispatched with the user entity. You can setup a listener for this event to
-perform required tasks after a successful authentication. The listener can
-optionally return an user entity as event result.
+perform required tasks. The listener can optionally return a user entity as
+event result.
 
-The user identity is persisted to session under key you have specified in
-middleware config (`Auth.User` by default).
+#### SocialAuth.beforeRedirect
 
-In case of authentication failure user is redirected back to login URL with
-`error` query string variable. It can have one of these values:
+After the completion of authentication process before the user is redirected
+to required URL a `SocialAuth.beforeRedirect` event is triggered. This event
+for e.g. can be used to set a visual notification like flash message to indicate
+the result of the authentication process to the user.
 
-- `provider_failure`: Auth through provider failed. Details will be logged in
-  `error.log` if `logErrors` option is set to `true`.
-- `finder_failure`: Finder failed to return user record. An e.g. of this is
-  a user has been authenticated through provider but your finder has condition
-  to not return inactivate user.
+Here's an e.g. listener with callbacks to the above method:
 
-### Event Listener
-
-To set up a listener for the `SocialAuth.afterIdentify` event, you can for example
-add this to your `UsersTable::initialize()` method:
 ```php
-use Cake\Event\EventManager;
+// src/Event/SocialAuthListener.php
 
-// at the end of the initialize() method
-EventManager::instance()->on('SocialAuth.afterIdentify', [$this, 'updateUser']);
-```
+namespace App\Event;
 
-Then create such method in this table class:
-```php
-    /**
-     * @param \Cake\Event\EventInterface $event
-     * @param \Cake\Datasource\EntityInterface $user
-     * @return \Cake\Datasource\EntityInterface
-     */
-    public function updateUser(EventInterface $event, $user)
-    {       
-        // You can access the profile through $user->social_profile->...
+use ADmad\SocialAuth\Middleware\SocialAuthMiddleware;
+use Cake\Datasource\EntityInterface;
+use Cake\Event\EventInterface;
+use Cake\Event\EventListenerInterface;
+use Cake\Http\ServerRequest;
+use Cake\ORM\Locator\LocatorAwareTrait;
 
-        // Additional mapping operations
-        // $user->last_login = date('Y-m-d H:i:s');
+class SocialAuthListener implements EventListenerInterface
+{
+    use LocatorAwareTrait;
 
-        $this->saveOrFail($user);
+    public function implementedEvents(): array
+    {
+        return [
+            SocialAuthMiddleware::EVENT_AFTER_IDENTIFY => 'afterIdentify',
+            SocialAuthMiddleware::EVENT_BEFORE_REDIRECT => 'beforeRedirect',
+            // Uncomment below if you want to use the event listener to return
+            // an entity for a new user instead of directly using `createUser()` table method.
+            // SocialAuthMiddleware::EVENT_CREATE_USER => 'createUser',
+        ];
+    }
+
+    public function afterIdentify(EventInterface $event, EntityInterface $user): EntityInterface
+    {
+        // Update last login time
+        $user->set('last_login', date('Y-m-d H:i:s'));
+
+        // You can access the profile using $user->social_profile
+
+        $this->getTableLocator()->get('User')->save($user);
 
         return $user;
     }
+
+    public function beforeRedirect(EventInterface $event, $redirectUrl, string $status, ServerRequest $request): void
+    {
+        $messages = (array)$request->session->read('Flash.flash');
+
+        // Set flash message
+        switch ($status) {
+            case SocialAuthMiddleware::AUTH_STATUS_SUCCESS:
+                $messages[] = [
+                    'message' => __('You are now logged in'),
+                    'key' => 'flash',
+                    'element' => 'flash/success',
+                    'params' => [],
+                ];
+                break;
+
+            // Auth through provider failed. Details will be logged in
+            // `error.log` if `logErrors` option is set to `true`.
+            case SocialAuthMiddleware::AUTH_STATUS_PROVIDER_FAILURE:
+
+            // Table finder failed to return user record. An e.g. of this is a
+            // user has been authenticated through provider but your finder has
+            //  conditionto not return an inactivated user.
+            case SocialAuthMiddleware::AUTH_STATUS_FINDER_FAILURE:
+                $messages[] = [
+                    'message' => __('Authentication failed'),
+                    'key' => 'flash',
+                    'element' => 'flash/error',
+                    'params' => [],
+                ];
+                break;
+        }
+
+        $request->getSession()->write('Flash.flash', $messages);
+
+        // You can return a modified $rediretUrl if needed.
+    }
+
+    public function createUser(EventInterface $event, EntityInterface $profile, Session $session): EventInterface
+    {
+        // Create and save entity for new user as shown in "createUser()" method above
+
+        return $user;
+    }
+```
+
+Attach the listener in your `Application` class:
+
+```php
+// src/Application.php
+use App\Event\SocialAuthListener;
+use Cake\Event\EventManager;
+
+// In Application::bootstrap() or Application::middleware()
+EventManager::instance()->on(new SocialAuthListener());
 ```
 
 Copyright
