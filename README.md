@@ -250,6 +250,8 @@ class SocialAuthListener implements EventListenerInterface
         // Update last login time
         $user->set('last_login', new FrozenTime());
 
+        // You can access the profile using $user->social_profile
+
         $this->getTableLocator()->get('Users')->saveOrFail($user);
 
         return $user;
