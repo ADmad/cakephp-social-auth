@@ -227,6 +227,7 @@ use Cake\Datasource\EntityInterface;
 use Cake\Event\EventInterface;
 use Cake\Event\EventListenerInterface;
 use Cake\Http\ServerRequest;
+use Cake\I18n\FrozenTime;
 use Cake\ORM\Locator\LocatorAwareTrait;
 
 class SocialAuthListener implements EventListenerInterface
@@ -247,18 +248,25 @@ class SocialAuthListener implements EventListenerInterface
     public function afterIdentify(EventInterface $event, EntityInterface $user): EntityInterface
     {
         // Update last login time
-        $user->set('last_login', date('Y-m-d H:i:s'));
+        $user->set('last_login', new FrozenTime());
 
         // You can access the profile using $user->social_profile
 
-        $this->getTableLocator()->get('User')->save($user);
+        $this->getTableLocator()->get('Users')->saveOrFail($user);
 
         return $user;
     }
 
-    public function beforeRedirect(EventInterface $event, $redirectUrl, string $status, ServerRequest $request): void
+    /**
+     * @param \Cake\Event\EventInterface $event
+     * @param string|array $url
+     * @param string $status
+     * @param \Cake\Http\ServerRequest $request
+     * @return void
+     */
+    public function beforeRedirect(EventInterface $event, $url, string $status, ServerRequest $request): void
     {
-        $messages = (array)$request->session->read('Flash.flash');
+        $messages = (array)$request->getSession()->read('Flash.flash');
 
         // Set flash message
         switch ($status) {
@@ -277,7 +285,7 @@ class SocialAuthListener implements EventListenerInterface
 
             // Table finder failed to return user record. An e.g. of this is a
             // user has been authenticated through provider but your finder has
-            //  conditionto not return an inactivated user.
+            // a condition to not return an inactivated user.
             case SocialAuthMiddleware::AUTH_STATUS_FINDER_FAILURE:
                 $messages[] = [
                     'message' => __('Authentication failed'),
@@ -290,7 +298,7 @@ class SocialAuthListener implements EventListenerInterface
 
         $request->getSession()->write('Flash.flash', $messages);
 
-        // You can return a modified $rediretUrl if needed.
+        // You can return a modified redirect URL if needed.
     }
 
     public function createUser(EventInterface $event, EntityInterface $profile, Session $session): EventInterface
@@ -299,6 +307,7 @@ class SocialAuthListener implements EventListenerInterface
 
         return $user;
     }
+}
 ```
 
 Attach the listener in your `Application` class:
