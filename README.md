@@ -285,7 +285,7 @@ class SocialAuthListener implements EventListenerInterface
 
             // Table finder failed to return user record. An e.g. of this is a
             // user has been authenticated through provider but your finder has
-            //  condition not return an inactivated user.
+            // a condition to not return an inactivated user.
             case SocialAuthMiddleware::AUTH_STATUS_FINDER_FAILURE:
                 $messages[] = [
                     'message' => __('Authentication failed'),
