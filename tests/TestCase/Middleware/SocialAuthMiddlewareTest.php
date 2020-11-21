@@ -5,13 +5,15 @@ namespace ADmad\SocialAuth\Test\TestCase\Middleware;
 
 use ADmad\SocialAuth\Middleware\SocialAuthMiddleware;
 use Cake\Http\Exception\MethodNotAllowedException;
+use Cake\Http\Response;
 use Cake\Http\ServerRequestFactory;
 use Cake\TestSuite\TestCase;
 use SocialConnect\Provider\Session\Dummy;
 use TestApp\Http\TestRequestHandler;
 
 /**
- * Test for SocialAuthMiddleware.
+ * @property \Cake\Http\ServerRequest $request
+ * @property \Psr\Http\Server\RequestHandlerInterface $handler
  */
 class SocialAuthMiddlewareTest extends TestCase
 {
@@ -32,6 +34,7 @@ class SocialAuthMiddlewareTest extends TestCase
         $middleware = new SocialAuthMiddleware();
         $response = $middleware->process($this->request, $this->handler);
 
+        $this->assertInstanceOf(Response::class, $response);
         $this->assertTrue($this->handler->called);
     }
 
@@ -92,6 +95,6 @@ class SocialAuthMiddlewareTest extends TestCase
         $this->expectException($class);
 
         $middleware = new SocialAuthMiddleware();
-        $response = $middleware->process($request, $this->handler);
+        $middleware->process($request, $this->handler);
     }
 }
