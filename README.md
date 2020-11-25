@@ -66,7 +66,7 @@ $middlewareQueue->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
         'password' => 'password',
     ],
     // Session key to which to write identity record to.
-    'sessionKey' => 'Auth.User',
+    'sessionKey' => 'Auth',
     // The method in user model which should be called in case of new user.
     // It should return a User entity.
     'getUserCallback' => 'getUser',

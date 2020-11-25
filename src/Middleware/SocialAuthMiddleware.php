@@ -110,7 +110,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      * - `finder`: Table finder. Default "all".
      * - `fields`: Specify password field for removal in returned user identity.
      *   Default `['password' => 'password']`.
-     * - `sessionKey`: Session key to write user record to. Default "Auth.User".
+     * - `sessionKey`: Session key to write user record to. Default "Auth".
      * - `getUserCallback`: The callback method which will be called on user
      *   model for getting user record matching social profile. Defaults "getUser".
      * - `serviceConfig`: SocialConnect/Auth service providers config.
