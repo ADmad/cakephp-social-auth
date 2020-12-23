@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-version: ['7.2', '7.4']
+        php-version: ['7.2', '7.4', '8.0']
         prefer-lowest: ['']
         include:
           - php-version: '7.2'
@@ -34,7 +34,6 @@ jobs:
 
     - name: Composer install
       run: |
-        composer --version
         if ${{ matrix.prefer-lowest == 'prefer-lowest' }}; then
           composer update --prefer-lowest --prefer-stable
         else
@@ -71,7 +70,7 @@ jobs:
         php-version: '7.4'
         extensions: mbstring, intl
         coverage: none
-        tools: cs2pr, psalm:^4.1, phpstan:^0.12
+        tools: cs2pr, psalm:^4.3, phpstan:^0.12
 
     - name: Composer Install
       run: composer install
