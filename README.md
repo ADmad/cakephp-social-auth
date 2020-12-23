@@ -301,7 +301,7 @@ class SocialAuthListener implements EventListenerInterface
         // You can return a modified redirect URL if needed.
     }
 
-    public function createUser(EventInterface $event, EntityInterface $profile, Session $session): EventInterface
+    public function createUser(EventInterface $event, EntityInterface $profile, Session $session): EntityInterface
     {
         // Create and save entity for new user as shown in "createUser()" method above
 
