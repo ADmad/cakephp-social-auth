@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace ADmad\SocialAuth\Test\TestCase\Middleware;
 
@@ -6,49 +7,35 @@ use ADmad\SocialAuth\Middleware\SocialAuthMiddleware;
 use Cake\Http\Exception\MethodNotAllowedException;
 use Cake\Http\Response;
 use Cake\Http\ServerRequestFactory;
-use Cake\Routing\Router;
 use Cake\TestSuite\TestCase;
 use SocialConnect\Provider\Session\Dummy;
+use TestApp\Http\TestRequestHandler;
 
 /**
- * Test for SocialAuthMiddleware.
+ * @property \Cake\Http\ServerRequest $request
+ * @property \Psr\Http\Server\RequestHandlerInterface $handler
  */
 class SocialAuthMiddlewareTest extends TestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
-        $this->response = new Response();
+        $this->loadPlugins(['ADmad/SocialAuth']);
 
-        include PLUGIN_ROOT . '/config/routes.php';
-        Router::$initialized = true;
-    }
-
-    protected function _getNext()
-    {
-        return function ($req, $res) {
-            return $res;
-        };
+        $_SERVER['REQUEST_URI'] = '/';
+        $this->request = ServerRequestFactory::fromGlobals();
+        $this->request = $this->request->withAttribute('webroot', '/');
+        $this->handler = new TestRequestHandler();
     }
 
     public function testPassOnToNextForNonAuthUrls()
     {
-        $request = ServerRequestFactory::fromGlobals([
-            'REQUEST_URI' => '/',
-        ]);
-
-        $called = false;
-        $next = function ($req, $res) use (&$called) {
-            $called = true;
-
-            return $res;
-        };
-
         $middleware = new SocialAuthMiddleware();
-        $middleware($request, $this->response, $next);
+        $response = $middleware->process($this->request, $this->handler);
 
-        $this->assertTrue($called);
+        $this->assertInstanceOf(Response::class, $response);
+        $this->assertTrue($this->handler->called);
     }
 
     public function testLoginUrl()
@@ -82,7 +69,8 @@ class SocialAuthMiddlewareTest extends TestCase
                 ],
             ],
         ], null, new Dummy());
-        $response = $middleware($request, $this->response, $this->_getNext());
+
+        $response = $middleware->process($request, $this->handler);
 
         $this->assertEquals(302, $response->getStatusCode());
         $this->assertNotEmpty($response->getHeaderLine('Location'));
@@ -107,6 +95,6 @@ class SocialAuthMiddlewareTest extends TestCase
         $this->expectException($class);
 
         $middleware = new SocialAuthMiddleware();
-        $response = $middleware($request, $this->response, $this->_getNext());
+        $middleware->process($request, $this->handler);
     }
 }

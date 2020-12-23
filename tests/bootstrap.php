@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Test suite bootstrap.
  *
@@ -27,5 +29,3 @@ require $root . '/vendor/cakephp/cakephp/tests/bootstrap.php';
 if (file_exists($root . '/config/bootstrap.php')) {
     require $root . '/config/bootstrap.php';
 }
-
-define('PLUGIN_ROOT', $root);

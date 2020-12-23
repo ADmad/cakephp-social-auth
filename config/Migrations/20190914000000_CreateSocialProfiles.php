@@ -48,9 +48,8 @@ class CreateSocialProfiles extends AbstractMigration
                 'limit' => 255,
                 'null' => true,
             ])
-            ->addColumn('birth_date', 'string', [
+            ->addColumn('birth_date', 'date', [
                 'default' => null,
-                'limit' => 255,
                 'null' => true,
             ])
             ->addColumn('gender', 'string', [
