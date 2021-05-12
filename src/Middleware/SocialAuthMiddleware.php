@@ -428,17 +428,11 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
                 case 'firstname':
                     $data['first_name'] = $value;
                     break;
-                case 'birthday':
-                    $data['birth_date'] = $value;
-                    break;
                 case 'emailVerified':
                     $data['email_verified'] = $value;
                     break;
                 case 'fullname':
                     $data['full_name'] = $value;
-                    break;
-                case 'sex':
-                    $data['gender'] = $value;
                     break;
                 case 'pictureURL':
                     $data['picture_url'] = $value;
@@ -448,6 +442,9 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
                     break;
             }
         }
+
+        $data['birth_date'] = $identity->getBirthday();
+        $data['gender'] = $identity->getSex();
 
         return $this->_profileModel->patchEntity($profile, $data);
     }
