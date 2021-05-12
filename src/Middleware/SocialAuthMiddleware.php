@@ -314,6 +314,12 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
             $provider = $this->_getService($request)->getProvider($providerName);
             $accessToken = $provider->getAccessTokenByRequestParameters($request->getQueryParams());
             $identity = $provider->getIdentity($accessToken);
+
+            if (!$identity->id) {
+                throw new RuntimeException(
+                    "`id` field is empty for the identity returned by `{$providerName}` provider."
+                );
+            }
         } catch (SocialConnectException $e) {
             $this->_error = self::AUTH_STATUS_PROVIDER_FAILURE;
 
