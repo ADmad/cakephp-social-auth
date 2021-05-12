@@ -263,7 +263,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
             $redirectUrl = $this->_triggerBeforeRedirect($request, $config['loginUrl'], $this->_error);
 
             return $response->withLocation(
-                Router::url($config['loginUrl'], true)
+                Router::url($redirectUrl, true)
             );
         }
 
