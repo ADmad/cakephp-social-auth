@@ -33,7 +33,7 @@ use Cake\ORM\Entity;
 class SocialProfile extends Entity
 {
     /**
-     * @var array
+     * @var bool[]
      */
     protected $_accessible = [
         '*' => true,
