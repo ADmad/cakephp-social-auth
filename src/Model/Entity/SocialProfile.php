@@ -16,7 +16,7 @@ use Cake\ORM\Entity;
  * @property int $id
  * @property int|null $user_id
  * @property string $provider
- * @property string $access_token
+ * @property \SocialConnect\Provider\AccessTokenInterface $access_token
  * @property string $identifier
  * @property string|null $username
  * @property string|null $first_name
