@@ -323,7 +323,7 @@ EventManager::instance()->on(new SocialAuthListener());
 
 ### Extend with custom providers
 
-In order to enable custom or not preconfigured provideres you can extend the middleware configuration with *serviceConfig.collectionFactory* and create your own instance of *SocialConnect\Auth\CollectionFactory*.
+In order to enable custom or not preconfigured provideres you can extend the middleware configuration with *collectionFactory* and create your own instance of *SocialConnect\Auth\CollectionFactory*.
 
 Attach the listener in your `Application` class:
 
@@ -340,8 +340,7 @@ $cf->register(\App\Authenticator\CustomProvider::NAME, \App\Authenticator\Custom
 ...
 
 // Add this to your configuration
-serviceConfig.collectionFactory => $cf,
-
+'collectionFactory' => $cf,
 
 
 // src/Authenticator\CustomProvider.php
