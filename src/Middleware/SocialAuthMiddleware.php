@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -536,7 +537,8 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
         $this->_service = new Service(
             $httpStack,
             $this->_session ?: new SocialConnectSession(),
-            $serviceConfig
+            $serviceConfig,
+            $serviceConfig['collectionFactory'] ?? null
         );
 
         return $this->_service;

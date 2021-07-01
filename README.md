@@ -321,6 +321,29 @@ use Cake\Event\EventManager;
 EventManager::instance()->on(new SocialAuthListener());
 ```
 
+### Extend with custom providers
+
+In order to enable custom or not preconfigured provideres you can extend the middleware configuration with *serviceConfig.collectionFactory* and create your own instance of *SocialConnect\Auth\CollectionFactory*.
+
+Attach the listener in your `Application` class:
+
+```php
+// src/Application.php
+SocialConnect\Auth\CollectionFactory;
+
+$cf = new CollectionFactory();
+// Instantiate your own CollectionFactory with
+$cf = new CollectionFactory();
+$cf->register(\App\Authenticator\CustomProvider::NAME, \App\Authenticator\CustomProvider::class);
+
+
+// src/Authenticator\CustomProvider.php
+/*
+    You will find a lot of examples invendor/socialconnect/auth/src/OpenIDConnect/Provider/
+*/
+```
+
+
 Copyright
 ---------
 Copyright 2017-Present ADmad
