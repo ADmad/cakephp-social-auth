@@ -331,10 +331,17 @@ Attach the listener in your `Application` class:
 // src/Application.php
 SocialConnect\Auth\CollectionFactory;
 
-$cf = new CollectionFactory();
 // Instantiate your own CollectionFactory with
+...
+public function middleware($middlewareQueue): \Cake\Http\MiddlewareQueue
+...
 $cf = new CollectionFactory();
 $cf->register(\App\Authenticator\CustomProvider::NAME, \App\Authenticator\CustomProvider::class);
+...
+
+// Add this to your configuration
+serviceConfig.collectionFactory => $cf,
+
 
 
 // src/Authenticator\CustomProvider.php
