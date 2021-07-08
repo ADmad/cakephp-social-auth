@@ -114,6 +114,8 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      * - `getUserCallback`: The callback method which will be called on user
      *   model for getting user record matching social profile. Defaults "getUser".
      * - `serviceConfig`: SocialConnect/Auth service providers config.
+     * - `collectionFactory`: Instance of `\SocialConnect\Auth\CollectionFactory`.
+     *   If none provided one will be auto created. Default `null`.
      * - `logErrors`: Whether social connect errors should be logged. Default `true`.
      *
      * @var array
@@ -132,6 +134,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
         'sessionKey' => 'Auth',
         'getUserCallback' => 'getUser',
         'serviceConfig' => [],
+        'collectionFactory' => null,
         'logErrors' => true,
     ];
 

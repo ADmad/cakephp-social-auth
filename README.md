@@ -97,6 +97,8 @@ $middlewareQueue->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
             ],
         ],
     ],
+    // Instance of `\SocialConnect\Auth\CollectionFactory`. If none provided one will be auto created. Default `null`.
+    'collectionFactory' => false,
     // Whether social connect errors should be logged. Default `true`.
     'logErrors' => true,
 ]));
@@ -323,30 +325,26 @@ EventManager::instance()->on(new SocialAuthListener());
 
 ### Extend with custom providers
 
-In order to enable custom or not preconfigured providers you can extend the middleware configuration with `collectionFactory` and create your own instance of `SocialConnect\Auth\CollectionFactory`.
+In order to enable custom providers (those not pre-included with `SocialConnect/Auth`)
+you can extend the middleware configuration with `collectionFactory` and passing in
+your own instance of `SocialConnect\Auth\CollectionFactory`.
 
-Attach the listener in your `Application` class:
+For e.g. create your custom provider at `src/Authenticator/MyProvider.php`.
+Check the providers in `vendor/socialconnect/auth/src/(OAuth1|OAuth2|OpenIDConnect)/Provider/`
+for examples.
+
+Create an instance of `CollectionFactory`.
 
 ```php
-// src/Application.php
-SocialConnect\Auth\CollectionFactory;
+$collectionFactory = new \SocialConnect\Auth\CollectionFactory();
+$collectionFactory->register(\App\Authenticator\MyProvider::NAME, \App\Authenticator\MyProvider::class);
+```
 
-// Instantiate your own CollectionFactory with
+Then set the factory instance in the middlware config shown above:
+```
 ...
-public function middleware($middlewareQueue): \Cake\Http\MiddlewareQueue
+'collectionFactory' => $collectionFactory
 ...
-$cf = new CollectionFactory();
-$cf->register(\App\Authenticator\CustomProvider::NAME, \App\Authenticator\CustomProvider::class);
-...
-
-// Add this to your configuration
-'collectionFactory' => $cf,
-
-
-// src/Authenticator\CustomProvider.php
-/*
-    You will find a lot of examples in vendor/socialconnect/auth/src/OpenIDConnect/Provider/
-*/
 ```
 
 Copyright
