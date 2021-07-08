@@ -536,7 +536,8 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
         $this->_service = new Service(
             $httpStack,
             $this->_session ?: new SocialConnectSession(),
-            $serviceConfig
+            $serviceConfig,
+            $this->getConfig('collectionFactory')
         );
 
         return $this->_service;
