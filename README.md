@@ -98,7 +98,7 @@ $middlewareQueue->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
         ],
     ],
     // Instance of `\SocialConnect\Auth\CollectionFactory`. If none provided one will be auto created. Default `null`.
-    'collectionFactory' => false,
+    'collectionFactory' => null,
     // Whether social connect errors should be logged. Default `true`.
     'logErrors' => true,
 ]));
