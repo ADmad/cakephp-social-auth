@@ -248,7 +248,7 @@ class SocialAuthListener implements EventListenerInterface
         ];
     }
 
-    public function beforeIdentify(EventInterface $event, EntityInterface $profile, Session $session): EntityInterface
+    public function beforeIdentify(EventInterface $event, EntityInterface $profile, Session $session)
     {
         // If you do not switch logged-in users
         $userId = $profile->get('user_id');
