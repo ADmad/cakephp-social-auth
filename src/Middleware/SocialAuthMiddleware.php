@@ -379,7 +379,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
         ]);
         $result = $event->getResult();
         if ($result !== null) {
-            $this->_error = is_string($result) ? $result : self::AUTH_STATUS_IDENTIFY_FAILURE;
+            $this->_error = self::AUTH_STATUS_IDENTIFY_FAILURE;
 
             return null;
         }

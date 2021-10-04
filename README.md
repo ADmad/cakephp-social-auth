@@ -259,7 +259,7 @@ class SocialAuthListener implements EventListenerInterface
         }
  
         if ($userId != $sessionUserId) {
-            return __('Linked to other users');
+            return false;
         }
     }
 
@@ -307,6 +307,15 @@ class SocialAuthListener implements EventListenerInterface
             case SocialAuthMiddleware::AUTH_STATUS_FINDER_FAILURE:
                 $messages[] = [
                     'message' => __('Authentication failed'),
+                    'key' => 'flash',
+                    'element' => 'flash/error',
+                    'params' => [],
+                ];
+                break;
+
+            case SocialAuthMiddleware::AUTH_STATUS_IDENTIFY_FAILURE:
+                $messages[] = [
+                    'message' => __('Linked to other user'),
                     'key' => 'flash',
                     'element' => 'flash/error',
                     'params' => [],
