@@ -55,6 +55,13 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
     public const QUERY_STRING_REDIRECT = 'redirect';
 
     /**
+     * The name of the event that is fired before user identification.
+     *
+     * @var string
+     */
+    public const EVENT_BEFORE_IDENTIFY = 'SocialAuth.beforeIdentify';
+
+    /**
      * The name of the event that is fired for a new user.
      *
      * @var string
@@ -95,6 +102,13 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      * @var string
      */
     public const AUTH_STATUS_FINDER_FAILURE = 'finder_failure';
+
+    /**
+     * Auth identify failure status.
+     *
+     * @var string
+     */
+    public const AUTH_STATUS_IDENTIFY_FAILURE = 'identify_failure';
 
     /**
      * Default config.
@@ -359,6 +373,17 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      */
     protected function _getUser(EntityInterface $profile, CakeSession $session): ?EntityInterface
     {
+        $event = $this->dispatchEvent(self::EVENT_BEFORE_IDENTIFY, [
+            'profile' => $profile,
+            'session' => $session,
+        ]);
+        $result = $event->getResult();
+        if ($result !== null) {
+            $this->_error = is_string($result) ? $result : self::AUTH_STATUS_IDENTIFY_FAILURE;
+
+            return null;
+        }
+
         $user = null;
 
         /** @var string $userPkField */

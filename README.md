@@ -239,12 +239,27 @@ class SocialAuthListener implements EventListenerInterface
     public function implementedEvents(): array
     {
         return [
+            SocialAuthMiddleware::EVENT_BEFORE_IDENTIFY => 'beforeIdentify',
             SocialAuthMiddleware::EVENT_AFTER_IDENTIFY => 'afterIdentify',
             SocialAuthMiddleware::EVENT_BEFORE_REDIRECT => 'beforeRedirect',
             // Uncomment below if you want to use the event listener to return
             // an entity for a new user instead of directly using `createUser()` table method.
             // SocialAuthMiddleware::EVENT_CREATE_USER => 'createUser',
         ];
+    }
+
+    public function beforeIdentify(EventInterface $event, EntityInterface $profile, Session $session): EntityInterface
+    {
+        // If you do not switch logged-in users
+        $userId = $profile->get('user_id');
+        $sessionUserId = $session->read('Auth.id');
+        if ($userId === null || $sessionUserId === null) {
+            return;
+        }
+ 
+        if ($userId != $sessionUserId) {
+            return __('Linked to other users');
+        }
     }
 
     public function afterIdentify(EventInterface $event, EntityInterface $user): EntityInterface
