@@ -153,7 +153,7 @@ public function getUser(EntityInterface $profile, Session $session)
 
     // If you want to associate the social entity with currently logged in user
     // use the $session argument to get user id and find matching user entity.
-    $userId = $session->read('Auth.User.id');
+    $userId = $session->read('Auth.id');
     if ($userId) {
         return $this->get($userId);
     }
