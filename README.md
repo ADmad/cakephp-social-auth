@@ -268,17 +268,10 @@ class SocialAuthListener implements EventListenerInterface
      */
     public function beforeRedirect(EventInterface $event, $url, string $status, ServerRequest $request): void
     {
-        $messages = (array)$request->getSession()->read('Flash.flash');
-
         // Set flash message
         switch ($status) {
             case SocialAuthMiddleware::AUTH_STATUS_SUCCESS:
-                $messages[] = [
-                    'message' => __('You are now logged in'),
-                    'key' => 'flash',
-                    'element' => 'flash/success',
-                    'params' => [],
-                ];
+                $request->getFlash()->error('You are now logged in.');
                 break;
 
             // Auth through provider failed. Details will be logged in
@@ -289,16 +282,13 @@ class SocialAuthListener implements EventListenerInterface
             // user has been authenticated through provider but your finder has
             // a condition to not return an inactivated user.
             case SocialAuthMiddleware::AUTH_STATUS_FINDER_FAILURE:
-                $messages[] = [
-                    'message' => __('Authentication failed'),
-                    'key' => 'flash',
-                    'element' => 'flash/error',
-                    'params' => [],
-                ];
+                $request->getFlash()->error('Authentication failed.');
+                break;
+
+            case SocialAuthMiddleware::AUTH_STATUS_IDENTITY_MISMATCH:
+                $request->getFlash()->error('The social profile is already linked to another user.');
                 break;
         }
-
-        $request->getSession()->write('Flash.flash', $messages);
 
         // You can return a modified redirect URL if needed.
     }

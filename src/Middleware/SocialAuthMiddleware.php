@@ -97,6 +97,13 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
     public const AUTH_STATUS_FINDER_FAILURE = 'finder_failure';
 
     /**
+     * User associated with social profile mismatches with user record in session.
+     *
+     * @var string
+     */
+    public const AUTH_STATUS_IDENTITY_MISMATCH = 'identity_mismatch';
+
+    /**
      * Default config.
      *
      * ### Options
@@ -251,6 +258,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
         $config = $this->getConfig();
         $providerName = $request->getParam('provider');
         $response = new Response();
+        $session = $request->getSession();
 
         $profile = $this->_getProfile($providerName, $request);
         if (!$profile) {
@@ -261,7 +269,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
             );
         }
 
-        $user = $this->_getUser($profile, $request->getSession());
+        $user = $this->_getUser($profile, $session);
         if (!$user) {
             $redirectUrl = $this->_triggerBeforeRedirect($request, $config['loginUrl'], $this->_error);
 
@@ -282,7 +290,10 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
             $user = $user->toArray();
         }
 
-        $request->getSession()->write($config['sessionKey'], $user);
+        if (!$session->check($config['sessionKey'])) {
+            $session->renew();
+            $session->write($config['sessionKey'], $user);
+        }
 
         $redirectUrl = $this->_triggerBeforeRedirect($request, $this->_getRedirectUrl($request));
 
@@ -313,6 +324,36 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      */
     protected function _getProfile($providerName, ServerRequest $request): ?EntityInterface
     {
+        $return = $this->_getSocialIdentity($providerName, $request);
+        if ($return === null) {
+            return null;
+        }
+
+        /** @var \Cake\Datasource\EntityInterface|null $profile */
+        $profile = $this->_profileModel->find()
+            ->where([
+                $this->_profileModel->aliasField('provider') => $providerName,
+                $this->_profileModel->aliasField('identifier') => $return['identity']->id,
+            ])
+            ->first();
+
+        return $this->_patchProfile(
+            $providerName,
+            $return['identity'],
+            $return['access_token'],
+            $profile ?: null
+        );
+    }
+
+    /**
+     * Get social identity.
+     *
+     * @param string $providerName Provider name.
+     * @param \Cake\Http\ServerRequest $request Request instance.
+     * @return array{identity: \SocialConnect\Common\Entity\User, access_token: \SocialConnect\Provider\AccessTokenInterface}|null
+     */
+    protected function _getSocialIdentity($providerName, ServerRequest $request): ?array
+    {
         try {
             $provider = $this->_getService($request)->getProvider($providerName);
             $accessToken = $provider->getAccessTokenByRequestParameters($request->getQueryParams());
@@ -333,20 +374,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
             return null;
         }
 
-        /** @var \Cake\Datasource\EntityInterface|null $profile */
-        $profile = $this->_profileModel->find()
-            ->where([
-                $this->_profileModel->aliasField('provider') => $providerName,
-                $this->_profileModel->aliasField('identifier') => $identity->id,
-            ])
-            ->first();
-
-        return $this->_patchProfile(
-            $providerName,
-            $identity,
-            $accessToken,
-            $profile ?: null
-        );
+        return ['identity' => $identity, 'access_token' => $accessToken];
     }
 
     /**
@@ -359,12 +387,27 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      */
     protected function _getUser(EntityInterface $profile, CakeSession $session): ?EntityInterface
     {
-        $user = null;
-
         /** @var string $userPkField */
         $userPkField = $this->_userModel->getPrimaryKey();
 
-        if ($profile->get('user_id')) {
+        $sessionUserId = $session->read($this->getConfig('sessionKey') . '.' . $userPkField);
+        $profileUserId = $profile->get('user_id');
+
+        // If the social profile is already connected to a user and that user
+        // is not the same as one currently set in session then it's an error.
+        if (
+            $sessionUserId &&
+            $profileUserId &&
+            $sessionUserId !== $profileUserId
+        ) {
+            $this->_error = self::AUTH_STATUS_IDENTITY_MISMATCH;
+
+            return null;
+        }
+
+        $user = null;
+
+        if ($profileUserId) {
             /** @var \Cake\Datasource\EntityInterface $user */
             $user = $this->_userModel->find()
                 ->where([
