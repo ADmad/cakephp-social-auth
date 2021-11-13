@@ -43,12 +43,12 @@ class Plugin extends BasePlugin
             ['plugin' => 'ADmad/SocialAuth', 'controller' => 'Auth'],
             function (RouteBuilder $routes) {
                 $routes->connect(
-                    '/login/:provider',
+                    '/login/{provider}',
                     ['action' => 'login'],
                     ['pass' => ['provider']]
                 );
                 $routes->connect(
-                    '/callback/:provider',
+                    '/callback/{provider}',
                     ['action' => 'callback'],
                     ['pass' => ['provider']]
                 );
