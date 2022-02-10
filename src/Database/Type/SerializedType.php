@@ -37,12 +37,18 @@ class SerializedType extends BaseType
      *
      * @param mixed $value The value to convert.
      * @param \Cake\Database\DriverInterface $driver The driver instance to convert with.
-     * @return string|null|array
+     * @return mixed
      */
     public function toPHP($value, DriverInterface $driver)
     {
         if ($value === null) {
             return $value;
+        }
+
+        if (is_resource($value)) {
+            $stream = $value;
+            $value = stream_get_contents($stream);
+            fclose($stream);
         }
 
         return unserialize($value);
