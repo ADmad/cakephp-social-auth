@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+use Cake\Core\Configure;
+
 /**
  * Test suite bootstrap.
  *
@@ -29,3 +31,8 @@ require $root . '/vendor/cakephp/cakephp/tests/bootstrap.php';
 if (file_exists($root . '/config/bootstrap.php')) {
     require $root . '/config/bootstrap.php';
 }
+
+Configure::write(
+    'Error.ignoredDeprecationPaths',
+    ['src/TestSuite/Fixture/FixtureInjector.php']
+);
