@@ -24,6 +24,8 @@ use Cake\Log\Log;
 use Cake\ORM\Locator\LocatorAwareTrait;
 use Cake\Routing\Router;
 use Cake\Utility\Hash;
+use Laminas\Diactoros\RequestFactory;
+use Laminas\Diactoros\StreamFactory;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
@@ -37,8 +39,6 @@ use SocialConnect\Provider\AccessTokenInterface;
 use SocialConnect\Provider\Exception\InvalidResponse;
 use SocialConnect\Provider\Session\Session as SocialConnectSession;
 use SocialConnect\Provider\Session\SessionInterface;
-use Zend\Diactoros\RequestFactory;
-use Zend\Diactoros\StreamFactory;
 
 class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterface
 {

@@ -3,7 +3,7 @@
     "description": "A CakePHP plugin which allows you to authenticate using social providers like Facebook/Google/Twitter etc.",
     "type": "cakephp-plugin",
     "require": {
-        "cakephp/cakephp": "^4.0",
+        "cakephp/cakephp": "^4.1",
         "socialconnect/auth": "^3.1"
     },
     "require-dev": {
@@ -26,5 +26,10 @@
     "scripts": {
         "cs-check": "vendor/bin/phpcs -n -p --extensions=php --standard=vendor/cakephp/cakephp-codesniffer/CakePHP src/ tests/",
         "cs-fix": "vendor/bin/phpcbf -p --extensions=php --standard=vendor/cakephp/cakephp-codesniffer/CakePHP src/ tests/"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     }
 }
