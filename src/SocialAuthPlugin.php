@@ -16,8 +16,10 @@ use Cake\Core\PluginApplicationInterface;
 use Cake\Database\TypeFactory;
 use Cake\Routing\RouteBuilder;
 
-class Plugin extends BasePlugin
+class SocialAuthPlugin extends BasePlugin
 {
+    protected ?string $name = 'SocialAuth';
+
     /**
      * @var bool
      */
