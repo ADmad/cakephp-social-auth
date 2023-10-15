@@ -4,3 +4,4 @@
 /.phpunit.cache
 /.idea/
 /config/Migrations/schema-dump-default.lock
+/tools

@@ -42,8 +42,14 @@ use SocialConnect\Provider\Exception\InvalidResponse;
 use SocialConnect\Provider\Session\Session as SocialConnectSession;
 use SocialConnect\Provider\Session\SessionInterface;
 
+/**
+ * @implements \Cake\Event\EventDispatcherInterface<\ADmad\SocialAuth\Middleware\SocialAuthMiddleware>
+ */
 class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterface
 {
+    /**
+     * @use \Cake\Event\EventDispatcherTrait<\ADmad\SocialAuth\Middleware\SocialAuthMiddleware>
+     */
     use EventDispatcherTrait;
     use InstanceConfigTrait;
     use LocatorAwareTrait;
@@ -562,7 +568,6 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
             $serviceConfig = Configure::consume('SocialAuth');
         }
 
-        /** @psalm-suppress PossiblyInvalidArrayOffset */
         if (!isset($serviceConfig['redirectUri'])) {
             $serviceConfig['redirectUri'] = Router::url([
                 'plugin' => 'ADmad/SocialAuth',
@@ -580,7 +585,6 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
             new StreamFactory()
         );
 
-        /** @psalm-suppress PossiblyNullArgument */
         $this->_service = new Service(
             $httpStack,
             $this->_session ?: new SocialConnectSession(),

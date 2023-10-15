@@ -74,7 +74,7 @@ jobs:
 
   cs-stan:
     name: Coding Standard & Static Analysis
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
     - uses: actions/checkout@v4
@@ -85,18 +85,21 @@ jobs:
         php-version: '8.1'
         extensions: mbstring, intl
         coverage: none
-        tools: cs2pr, vimeo/psalm:4, phpstan:1
+        tools: phive, cs2pr
 
-    - name: Composer Install
-      run: composer install
+    - name: Composer install
+      uses: ramsey/composer-install@v2
+
+    - name: Install PHP tools with phive.
+      run: "phive install --trust-gpg-keys 'CF1A108D0E7AE720,51C67305FFC2E5C0,12CE0F1D262429A5'"
 
     - name: Run phpcs
       run: vendor/bin/phpcs --report=checkstyle src/ tests/ | cs2pr
 
     - name: Run psalm
       if: always()
-      run: psalm --output-format=github
+      run: tools/psalm --output-format=github
 
-    - name: Run psalm
+    - name: Run phpstan
       if: always()
-      run: phpstan analyse
+      run: tools/phpstan analyse --error-format=github

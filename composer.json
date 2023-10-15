@@ -25,7 +25,17 @@
     "license": "MIT",
     "scripts": {
         "cs-check": "phpcs --colors -p ./src ./tests",
-        "cs-fix": "phpcbf --colors -p ./src ./tests"
+        "cs-fix": "phpcbf --colors -p ./src ./tests",
+        "test": "phpunit",
+        "phpstan": "tools/phpstan analyse",
+        "psalm": "tools/psalm --show-info=false",
+        "stan": [
+            "@phpstan",
+            "@psalm"
+        ],
+        "phpstan-baseline": "tools/phpstan --generate-baseline",
+        "psalm-baseline": "tools/psalm --set-baseline=psalm-baseline.xml",
+        "stan-setup": "phive install"
     },
     "config": {
         "allow-plugins": {
