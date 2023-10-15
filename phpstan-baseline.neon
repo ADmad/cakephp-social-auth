@@ -6,6 +6,6 @@ parameters:
 			path: src/Middleware/SocialAuthMiddleware.php
 
 		-
-			message: "#^Method ADmad\\\\SocialAuth\\\\Plugin\\:\\:bootstrap\\(\\) has parameter \\$app with generic interface Cake\\\\Core\\\\PluginApplicationInterface but does not specify its types\\: TSubject$#"
+			message: "#^Method ADmad\\\\SocialAuth\\\\SocialAuthPlugin\\:\\:bootstrap\\(\\) has parameter \\$app with generic interface Cake\\\\Core\\\\PluginApplicationInterface but does not specify its types\\: TSubject$#"
 			count: 1
-			path: src/Plugin.php
+			path: src/SocialAuthPlugin.php
