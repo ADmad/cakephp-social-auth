@@ -33,7 +33,7 @@ class SocialProfilesTable extends Table
     /**
      * Initialize table.
      *
-     * @param array $config Configuration
+     * @param array<string, mixed> $config Configuration
      * @return void
      */
     public function initialize(array $config): void

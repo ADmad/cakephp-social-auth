@@ -133,7 +133,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      *   If none provided one will be auto created. Default `null`.
      * - `logErrors`: Whether social connect errors should be logged. Default `true`.
      *
-     * @var array
+     * @var array<string, mixed>
      */
     protected array $_defaultConfig = [
         'requestMethod' => 'POST',
@@ -186,12 +186,12 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      *
      * @var string
      */
-    protected string $_error;
+    protected string $_error = '';
 
     /**
      * Constructor.
      *
-     * @param array $config Configuration.
+     * @param array<string, mixed> $config Configuration.
      * @param \Cake\Event\EventManager|null $eventManager Event manager instance.
      * @param \SocialConnect\Provider\Session\SessionInterface|null $session Session handler for SocialConnect Service
      */
