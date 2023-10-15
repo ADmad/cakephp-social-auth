@@ -23,19 +23,19 @@ use Cake\ORM\Entity;
  * @property string|null $last_name
  * @property string|null $full_name
  * @property string|null $email
- * @property \Cake\I18n\FrozenDate|null $birth_date
+ * @property \Cake\I18n\Date|null $birth_date
  * @property string|null $gender
  * @property string|null $picture_url
  * @property bool $email_verified
- * @property \Cake\I18n\FrozenTime|null $created
- * @property \Cake\I18n\FrozenTime|null $modified
+ * @property \Cake\I18n\Time|null $created
+ * @property \Cake\I18n\Time|null $modified
  */
 class SocialProfile extends Entity
 {
     /**
      * @var array<string, bool>
      */
-    protected $_accessible = [
+    protected array $_accessible = [
         '*' => true,
         'id' => false,
     ];

@@ -16,12 +16,14 @@ use Cake\Core\PluginApplicationInterface;
 use Cake\Database\TypeFactory;
 use Cake\Routing\RouteBuilder;
 
-class Plugin extends BasePlugin
+class SocialAuthPlugin extends BasePlugin
 {
+    protected ?string $name = 'SocialAuth';
+
     /**
      * @var bool
      */
-    protected $consoleEnabled = false;
+    protected bool $consoleEnabled = false;
 
     /**
      * @param \Cake\Core\PluginApplicationInterface $app Application instance.
@@ -41,7 +43,7 @@ class Plugin extends BasePlugin
         $routes->scope(
             '/social-auth',
             ['plugin' => 'ADmad/SocialAuth', 'controller' => 'Auth'],
-            function (RouteBuilder $routes) {
+            function (RouteBuilder $routes): void {
                 $routes->connect(
                     '/login/{provider}',
                     ['action' => 'login'],
