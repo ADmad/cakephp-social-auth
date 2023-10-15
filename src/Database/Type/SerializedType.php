@@ -10,7 +10,7 @@ declare(strict_types=1);
 
 namespace ADmad\SocialAuth\Database\Type;
 
-use Cake\Database\DriverInterface;
+use Cake\Database\Driver;
 use Cake\Database\Type\BaseType;
 use PDO;
 
@@ -20,10 +20,10 @@ class SerializedType extends BaseType
      * Convert a value data into a serialized string.
      *
      * @param mixed $value The value to convert.
-     * @param \Cake\Database\DriverInterface $driver The driver instance to convert with.
+     * @param \Cake\Database\Driver $driver The driver instance to convert with.
      * @return string|null
      */
-    public function toDatabase($value, DriverInterface $driver)
+    public function toDatabase(mixed $value, Driver $driver): mixed
     {
         if ($value === null || is_string($value)) {
             return $value;
@@ -36,10 +36,10 @@ class SerializedType extends BaseType
      * Convert string values to PHP data structure.
      *
      * @param mixed $value The value to convert.
-     * @param \Cake\Database\DriverInterface $driver The driver instance to convert with.
+     * @param \Cake\Database\Driver $driver The driver instance to convert with.
      * @return mixed
      */
-    public function toPHP($value, DriverInterface $driver)
+    public function toPHP(mixed $value, Driver $driver): mixed
     {
         if ($value === null) {
             return $value;
@@ -58,10 +58,10 @@ class SerializedType extends BaseType
      * Get the correct PDO binding type for string data.
      *
      * @param mixed $value The value being bound.
-     * @param \Cake\Database\DriverInterface $driver The driver.
+     * @param \Cake\Database\Driver $driver The driver.
      * @return int
      */
-    public function toStatement($value, DriverInterface $driver)
+    public function toStatement(mixed $value, Driver $driver): int
     {
         if ($value === null) {
             return PDO::PARAM_NULL;
@@ -76,7 +76,7 @@ class SerializedType extends BaseType
      * @param mixed $value The value to convert.
      * @return mixed Converted value.
      */
-    public function marshal($value)
+    public function marshal(mixed $value): mixed
     {
         if (is_array($value) || $value === null) {
             return $value;

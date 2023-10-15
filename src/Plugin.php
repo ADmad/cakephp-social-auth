@@ -21,7 +21,7 @@ class Plugin extends BasePlugin
     /**
      * @var bool
      */
-    protected $consoleEnabled = false;
+    protected bool $consoleEnabled = false;
 
     /**
      * @param \Cake\Core\PluginApplicationInterface $app Application instance.
@@ -41,7 +41,7 @@ class Plugin extends BasePlugin
         $routes->scope(
             '/social-auth',
             ['plugin' => 'ADmad/SocialAuth', 'controller' => 'Auth'],
-            function (RouteBuilder $routes) {
+            function (RouteBuilder $routes): void {
                 $routes->connect(
                     '/login/{provider}',
                     ['action' => 'login'],

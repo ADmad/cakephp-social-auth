@@ -10,15 +10,15 @@ on:
 
 jobs:
   testsuite:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
-        php-version: ['7.4', '8.0', '8.1']
+        php-version: ['8.1', '8.2']
         db-type: [sqlite, mysql, pgsql]
         prefer-lowest: ['']
         include:
-          - php-version: '7.2'
+          - php-version: '8.1'
             db-type: 'sqlite'
             prefer-lowest: 'prefer-lowest'
 
@@ -31,7 +31,7 @@ jobs:
           POSTGRES_PASSWORD: postgres
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup Service
       if: matrix.db-type == 'mysql'
@@ -62,41 +62,44 @@ jobs:
         if [[ ${{ matrix.db-type }} == 'sqlite' ]]; then export DB_URL='sqlite:///:memory:'; fi
         if [[ ${{ matrix.db-type }} == 'mysql' ]]; then export DB_URL='mysql://root:root@127.0.0.1/cakephp'; fi
         if [[ ${{ matrix.db-type }} == 'pgsql' ]]; then export DB_URL='postgres://postgres:postgres@127.0.0.1/postgres'; fi
-        if [[ ${{ matrix.php-version }} == '7.4' ]]; then
+        if [[ ${{ matrix.php-version }} == '8.1' ]]; then
           vendor/bin/phpunit --coverage-clover=coverage.xml
         else
           vendor/bin/phpunit
         fi
 
     - name: Code Coverage Report
-      if: success() && matrix.php-version == '7.4'
+      if: success() && matrix.php-version == '8.1'
       uses: codecov/codecov-action@v3
 
   cs-stan:
     name: Coding Standard & Static Analysis
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '7.4'
+        php-version: '8.1'
         extensions: mbstring, intl
         coverage: none
-        tools: cs2pr, vimeo/psalm:4, phpstan:1
+        tools: phive, cs2pr
 
-    - name: Composer Install
-      run: composer install
+    - name: Composer install
+      uses: ramsey/composer-install@v2
+
+    - name: Install PHP tools with phive.
+      run: "phive install --trust-gpg-keys 'CF1A108D0E7AE720,51C67305FFC2E5C0,12CE0F1D262429A5'"
 
     - name: Run phpcs
-      run: vendor/bin/phpcs -q --report=checkstyle --standard=vendor/cakephp/cakephp-codesniffer/CakePHP src/ tests/ | cs2pr
+      run: vendor/bin/phpcs --report=checkstyle src/ tests/ | cs2pr
 
     - name: Run psalm
       if: always()
-      run: psalm --output-format=github
+      run: tools/psalm --output-format=github
 
-    - name: Run psalm
+    - name: Run phpstan
       if: always()
-      run: phpstan analyse
+      run: tools/phpstan analyse --error-format=github

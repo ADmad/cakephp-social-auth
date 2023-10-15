@@ -1,0 +1,11 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Parameter \\#1 \\$callback of function call_user_func expects callable\\(\\)\\: mixed, array\\{Cake\\\\ORM\\\\Table, mixed\\} given\\.$#"
+			count: 1
+			path: src/Middleware/SocialAuthMiddleware.php
+
+		-
+			message: "#^Method ADmad\\\\SocialAuth\\\\Plugin\\:\\:bootstrap\\(\\) has parameter \\$app with generic interface Cake\\\\Core\\\\PluginApplicationInterface but does not specify its types\\: TSubject$#"
+			count: 1
+			path: src/Plugin.php

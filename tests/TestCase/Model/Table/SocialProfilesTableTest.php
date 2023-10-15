@@ -3,19 +3,12 @@ declare(strict_types=1);
 
 namespace ADmad\SocialAuth\Test\TestCase\Model\Table;
 
+use ADmad\SocialAuth\Model\Table\SocialProfilesTable;
 use Cake\TestSuite\TestCase;
 
-/**
- * @property \ADmad\SocialAuth\Model\Table\SocialProfilesTable $socialProfilesTable
- */
 class SocialProfilesTableTest extends TestCase
 {
-    /**
-     * @var string[]
-     */
-    protected $fixtures = [
-        'plugin.ADmad/SocialAuth.SocialProfiles',
-    ];
+    protected SocialProfilesTable $socialProfilesTable;
 
     /**
      * @return void

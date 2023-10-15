@@ -10,23 +10,20 @@ use Cake\Event\EventInterface;
 use Cake\Event\EventManager;
 use Cake\Http\Exception\MethodNotAllowedException;
 use Cake\Http\Response;
+use Cake\Http\ServerRequest;
 use Cake\Http\ServerRequestFactory;
 use Cake\TestSuite\TestCase;
+use Psr\Http\Server\RequestHandlerInterface;
 use SocialConnect\Common\Entity\User;
 use SocialConnect\Provider\AccessTokenInterface;
 use SocialConnect\Provider\Session\Dummy;
 use TestApp\Http\TestRequestHandler;
 
-/**
- * @property \Cake\Http\ServerRequest $request
- * @property \Psr\Http\Server\RequestHandlerInterface $handler
- */
 class SocialAuthMiddlewareTest extends TestCase
 {
-    protected $fixtures = [
-        'plugin.ADmad/SocialAuth.Users',
-        'plugin.ADmad/SocialAuth.SocialProfiles',
-    ];
+    protected ServerRequest $request;
+
+    protected RequestHandlerInterface $handler;
 
     public function setUp(): void
     {
