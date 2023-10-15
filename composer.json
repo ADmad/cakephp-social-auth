@@ -3,12 +3,12 @@
     "description": "A CakePHP plugin which allows you to authenticate using social providers like Facebook/Google/Twitter etc.",
     "type": "cakephp-plugin",
     "require": {
-        "cakephp/cakephp": "^4.1",
+        "cakephp/cakephp": "^5.0",
         "socialconnect/auth": "^3.1"
     },
     "require-dev": {
-        "phpunit/phpunit": "^8.5.0 || ^9.5.0",
-        "cakephp/cakephp-codesniffer": "^4.0"
+        "phpunit/phpunit": "^10.1",
+        "cakephp/cakephp-codesniffer": "^5.0"
     },
     "autoload": {
         "psr-4": {
@@ -24,8 +24,8 @@
     },
     "license": "MIT",
     "scripts": {
-        "cs-check": "vendor/bin/phpcs -n -p --extensions=php --standard=vendor/cakephp/cakephp-codesniffer/CakePHP src/ tests/",
-        "cs-fix": "vendor/bin/phpcbf -p --extensions=php --standard=vendor/cakephp/cakephp-codesniffer/CakePHP src/ tests/"
+        "cs-check": "phpcs --colors -p ./src ./tests",
+        "cs-fix": "phpcbf --colors -p ./src ./tests"
     },
     "config": {
         "allow-plugins": {

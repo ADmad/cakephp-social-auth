@@ -12,7 +12,7 @@ class TestRequestHandler implements RequestHandlerInterface
 {
     public $callable;
 
-    public $called = false;
+    public bool $called = false;
 
     public function __construct(?callable $callable = null)
     {

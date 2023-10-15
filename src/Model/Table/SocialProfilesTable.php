@@ -10,7 +10,6 @@ declare(strict_types=1);
 
 namespace ADmad\SocialAuth\Model\Table;
 
-use Cake\Database\Schema\TableSchemaInterface;
 use Cake\ORM\Table;
 
 /**
@@ -42,18 +41,6 @@ class SocialProfilesTable extends Table
         parent::initialize($config);
 
         $this->addBehavior('Timestamp');
-    }
-
-    /**
-     * Set custom type of "access_token" column.
-     *
-     * @param \Cake\Database\Schema\TableSchemaInterface $schema The table definition fetched from database.
-     * @return \Cake\Database\Schema\TableSchemaInterface
-     */
-    protected function _initializeSchema(TableSchemaInterface $schema): TableSchemaInterface
-    {
-        $schema->setColumnType('access_token', 'social-auth.serialized');
-
-        return $schema;
+        $this->getSchema()->setColumnType('access_token', 'social-auth.serialized');
     }
 }
