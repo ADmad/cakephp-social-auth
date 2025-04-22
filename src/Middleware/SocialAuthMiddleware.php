@@ -120,17 +120,18 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
      * - `loginUrl`: Login page URL. In case of auth failure user is redirected
      *   to this login page with "error" query string var.
      * - `userEntity`: Whether to return entity or array for user. Default `false`.
-     * - `userModel`: User model name. Default "Users".
-     * - `profileModel`: Social profile model. Default "ADmad/SocialAuth.SocialProfiles".
+     * - `userId`: Boolean or string whether identity should be stored as ID only (PrimaryKeySession). Default `false`.
+     * - `userModel`: User model name. Default `'Users'`.
+     * - `profileModel`: Social profile model. Default `ADmad/SocialAuth.SocialProfiles`.
      * - `finder`: Table finder. Default "all".
      * - `fields`: Specify password field for removal in returned user identity.
      *   Default `['password' => 'password']`.
      * - `sessionKey`: Session key to write user record to. Default "Auth".
-     * - `getUserCallback`: The callback method which will be called on user
+     * - `getUserCallback`: The callback method which will be called on the user
      *   model for getting user record matching social profile. Defaults "getUser".
      * - `serviceConfig`: SocialConnect/Auth service providers config.
      * - `collectionFactory`: Instance of `\SocialConnect\Auth\CollectionFactory`.
-     *   If none provided one will be auto created. Default `null`.
+     *   If none is provided, one will be auto created. Default `null`.
      * - `logErrors`: Whether social connect errors should be logged. Default `true`.
      *
      * @var array<string, mixed>
@@ -140,6 +141,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
         'loginUrl' => '/users/login',
         'loginRedirect' => '/',
         'userEntity' => false,
+        'userId' => false,
         'userModel' => 'Users',
         'profileModel' => 'ADmad/SocialAuth.SocialProfiles',
         'finder' => 'all',
@@ -198,7 +200,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
     public function __construct(
         array $config = [],
         ?EventManager $eventManager = null,
-        ?SessionInterface $session = null
+        ?SessionInterface $session = null,
     ) {
         $this->setConfig($config);
 
@@ -231,6 +233,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
 
         $method = '_handle' . ucfirst($action) . 'Action';
 
+        /** @var \Cake\Http\ServerRequest $request */
         return $this->{$method}($request);
     }
 
@@ -273,7 +276,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
             $redirectUrl = $this->_triggerBeforeRedirect($request, $config['loginUrl'], $this->_error);
 
             return $response->withLocation(
-                Router::url($redirectUrl, true)
+                Router::url($redirectUrl, true),
             );
         }
 
@@ -282,7 +285,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
             $redirectUrl = $this->_triggerBeforeRedirect($request, $config['loginUrl'], $this->_error);
 
             return $response->withLocation(
-                Router::url($redirectUrl, true)
+                Router::url($redirectUrl, true),
             );
         }
 
@@ -294,7 +297,13 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
             $user = $result;
         }
 
-        if (!$config['userEntity']) {
+        if ($config['userId']) {
+            $id = $config['userId'];
+            if ($id === true) {
+                $id = 'id';
+            }
+            $user = $user->get($id);
+        } elseif (!$config['userEntity']) {
             $user = $user->toArray();
         }
 
@@ -306,7 +315,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
         $redirectUrl = $this->_triggerBeforeRedirect($request, $this->_getRedirectUrl($request));
 
         return $response->withLocation(
-            Router::url($redirectUrl, true)
+            Router::url($redirectUrl, true),
         );
     }
 
@@ -349,7 +358,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
             $providerName,
             $return['identity'],
             $return['access_token'],
-            $profile ?: null
+            $profile ?: null,
         );
     }
 
@@ -369,7 +378,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
 
             if (!$identity->id) {
                 throw new RuntimeException(
-                    "`id` field is empty for the identity returned by `{$providerName}` provider."
+                    "`id` field is empty for the identity returned by `{$providerName}` provider.",
                 );
             }
         } catch (SocialConnectException $e) {
@@ -459,7 +468,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
         string $providerName,
         SocialConnectUser $identity,
         AccessTokenInterface $accessToken,
-        ?EntityInterface $profile = null
+        ?EntityInterface $profile = null,
     ): EntityInterface {
         if ($profile === null) {
             $profile = $this->_profileModel->newEntity([
@@ -525,7 +534,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
             $user = call_user_func(
                 [$this->_userModel, $this->getConfig('getUserCallback')],
                 $profile,
-                $session
+                $session,
             );
         }
 
@@ -582,14 +591,14 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
         $httpStack = new HttpStack(
             new Client(),
             new RequestFactory(),
-            new StreamFactory()
+            new StreamFactory(),
         );
 
         $this->_service = new Service(
             $httpStack,
             $this->_session ?: new SocialConnectSession(),
             $serviceConfig,
-            $this->getConfig('collectionFactory')
+            $this->getConfig('collectionFactory'),
         );
 
         return $this->_service;
@@ -647,7 +656,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
     protected function _triggerBeforeRedirect(
         ServerRequestInterface $request,
         array|string $redirectUrl,
-        string $status = self::AUTH_STATUS_SUCCESS
+        string $status = self::AUTH_STATUS_SUCCESS,
     ): array|string {
         $event = $this->dispatchEvent(self::EVENT_BEFORE_REDIRECT, [
             'redirectUrl' => $redirectUrl,
@@ -675,7 +684,7 @@ class SocialAuthMiddleware implements MiddlewareInterface, EventDispatcherInterf
         $message = sprintf(
             '[%s] %s',
             get_class($exception),
-            $exception->getMessage()
+            $exception->getMessage(),
         );
 
         $message .= "\nRequest URL: " . $request->getRequestTarget();
