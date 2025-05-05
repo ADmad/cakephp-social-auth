@@ -155,7 +155,7 @@ class SocialAuthMiddlewareTest extends TestCase
             SocialAuthMiddleware::EVENT_BEFORE_REDIRECT,
             function (EventInterface $event, $url, string $status) {
                 $this->assertSame(SocialAuthMiddleware::AUTH_STATUS_IDENTITY_MISMATCH, $status);
-            }
+            },
         );
 
         $middleware->process($request, $this->handler);

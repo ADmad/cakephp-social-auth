@@ -47,18 +47,18 @@ class SocialAuthPlugin extends BasePlugin
                 $routes->connect(
                     '/login/{provider}',
                     ['action' => 'login'],
-                    ['pass' => ['provider']]
+                    ['pass' => ['provider']],
                 );
                 $routes->connect(
                     '/callback/{provider}',
                     ['action' => 'callback'],
-                    ['pass' => ['provider']]
+                    ['pass' => ['provider']],
                 );
                 $routes->connect(
                     '/callback',
-                    ['action' => 'callback']
+                    ['action' => 'callback'],
                 );
-            }
+            },
         );
     }
 }

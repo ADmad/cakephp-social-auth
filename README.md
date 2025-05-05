@@ -17,7 +17,7 @@ composer require admad/cakephp-social-auth
 
 ## Setup
 
-Load the plugin by running following command in terminal:
+Load the plugin by running the following command in the terminal:
 
 ```
 bin/cake plugin load ADmad/SocialAuth
@@ -54,7 +54,7 @@ $middlewareQueue->add(new \ADmad\SocialAuth\Middleware\SocialAuthMiddleware([
     // URL to redirect to after authentication (string or array).
     'loginRedirect' => '/',
     // Boolean indicating whether user identity should be returned as entity.
-    'userEntity' => false,
+    'userEntity' => true, // Compatibility with default CakePHP auth plugins
     // User model.
     'userModel' => 'Users',
     // Social profile model.
@@ -147,7 +147,7 @@ use \Cake\Http\Session;
 public function getUser(EntityInterface $profile, Session $session)
 {
     // Make sure here that all the required fields are actually present
-    if (empty($profile->email)) {
+    if (!$profile->email) {
         throw new \RuntimeException('Could not find email in social profile.');
     }
 
