@@ -7,8 +7,8 @@
         "socialconnect/auth": "^3.3"
     },
     "require-dev": {
-        "phpunit/phpunit": "^10.1",
-        "cakephp/cakephp-codesniffer": "^5.0"
+        "phpunit/phpunit": "^10.5.58 || ^11.5.3 || ^12.4",
+        "cakephp/cakephp-codesniffer": "^5.2"
     },
     "autoload": {
         "psr-4": {
