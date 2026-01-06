@@ -47,7 +47,7 @@ class SerializedType extends BaseType
 
         if (is_resource($value)) {
             $stream = $value;
-            $value = stream_get_contents($stream);
+            $value = (string)stream_get_contents($stream);
             fclose($stream);
         }
 

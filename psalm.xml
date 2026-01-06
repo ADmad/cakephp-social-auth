@@ -16,6 +16,9 @@
     </projectFiles>
 
     <issueHandlers>
-        <PropertyNotSetInConstructor errorLevel="suppress"/>
+        <PropertyNotSetInConstructor errorLevel="info"/>
+        <MissingOverrideAttribute errorLevel="info"/>
+        <RiskyTruthyFalsyComparison errorLevel="info"/>
+        <ClassMustBeFinal errorLevel="suppress"/>
     </issueHandlers>
 </psalm>

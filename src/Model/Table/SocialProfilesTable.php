@@ -15,17 +15,10 @@ use Cake\ORM\Table;
 /**
  * @method \ADmad\SocialAuth\Model\Entity\SocialProfile newEmptyEntity()
  * @method \ADmad\SocialAuth\Model\Entity\SocialProfile newEntity(array $data, array $options = [])
- * @method \ADmad\SocialAuth\Model\Entity\SocialProfile[] newEntities(array $data, array $options = [])
+ * @method array<\ADmad\SocialAuth\Model\Entity\SocialProfile> newEntities(array $data, array $options = [])
  * @method \ADmad\SocialAuth\Model\Entity\SocialProfile get(mixed $primaryKey, array|string $finder = 'all', \Psr\SimpleCache\CacheInterface|string|null $cache = null, \Closure|string|null $cacheKey = null, mixed ...$args)
- * @method \ADmad\SocialAuth\Model\Entity\SocialProfile findOrCreate($search, ?callable $callback = null, $options = [])
- * @method \ADmad\SocialAuth\Model\Entity\SocialProfile patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
- * @method \ADmad\SocialAuth\Model\Entity\SocialProfile[] patchEntities(iterable $entities, array $data, array $options = [])
- * @method \ADmad\SocialAuth\Model\Entity\SocialProfile|false save(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method \ADmad\SocialAuth\Model\Entity\SocialProfile saveOrFail(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method \ADmad\SocialAuth\Model\Entity\SocialProfile[]|false saveMany(iterable $entities, $options = [])
- * @method \ADmad\SocialAuth\Model\Entity\SocialProfile[] saveManyOrFail(iterable $entities, $options = [])
- * @method \ADmad\SocialAuth\Model\Entity\SocialProfile[]|false deleteMany(iterable $entities, $options = [])
- * @method \ADmad\SocialAuth\Model\Entity\SocialProfile[] deleteManyOrFail(iterable $entities, $options = [])
+ * @method \ADmad\SocialAuth\Model\Entity\SocialProfile findOrCreate(\Cake\ORM\Query\SelectQuery|callable|array $search, callable|array|null $callback = null, array $options = [])
+ * @extends \Cake\ORM\Table<array{Timestamp: \Cake\ORM\Behavior\TimestampBehavior}>
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  */
 class SocialProfilesTable extends Table
