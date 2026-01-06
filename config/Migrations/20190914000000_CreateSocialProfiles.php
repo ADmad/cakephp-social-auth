@@ -1,7 +1,7 @@
 <?php
-use Phinx\Migration\AbstractMigration;
+use Migrations\BaseMigration;
 
-class CreateSocialProfiles extends AbstractMigration
+class CreateSocialProfiles extends BaseMigration
 {
     public function change()
     {
