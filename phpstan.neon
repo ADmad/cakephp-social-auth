@@ -9,3 +9,4 @@ parameters:
 		- src/
 	ignoreErrors:
 		- identifier: missingType.iterableValue
+		- identifier: missingType.generics
