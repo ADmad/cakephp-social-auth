@@ -229,7 +229,7 @@ use Cake\Datasource\EntityInterface;
 use Cake\Event\EventInterface;
 use Cake\Event\EventListenerInterface;
 use Cake\Http\ServerRequest;
-use Cake\I18n\FrozenTime;
+use Cake\I18n\DateTime;
 use Cake\ORM\Locator\LocatorAwareTrait;
 
 class SocialAuthListener implements EventListenerInterface
@@ -250,7 +250,7 @@ class SocialAuthListener implements EventListenerInterface
     public function afterIdentify(EventInterface $event, EntityInterface $user): EntityInterface
     {
         // Update last login time
-        $user->set('last_login', new FrozenTime());
+        $user->set('last_login', new DateTime());
 
         // You can access the profile using $user->social_profile
 
