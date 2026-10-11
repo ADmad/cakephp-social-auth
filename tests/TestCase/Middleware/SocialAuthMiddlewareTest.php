@@ -82,6 +82,9 @@ class SocialAuthMiddlewareTest extends TestCase
 
         $this->assertEquals(302, $response->getStatusCode());
         $this->assertNotEmpty($response->getHeaderLine('Location'));
+
+        parse_str(parse_url($response->getHeaderLine('Location'), PHP_URL_QUERY), $query);
+        $this->assertSame('/social-auth/callback/facebook', parse_url($query['redirect_uri'], PHP_URL_PATH));
     }
 
     public function testLoginUrlException()
@@ -137,18 +140,17 @@ class SocialAuthMiddlewareTest extends TestCase
             ]));
 
         $middleware = $this->getMockBuilder(SocialAuthMiddleware::class)
-            ->onlyMethods(['_getSocialIdentity'])
+            ->onlyMethods(['getSocialIdentity'])
             ->getMock();
 
-        $accessToken = $this->getMockBuilder(AccessTokenInterface::class)
-            ->getMock();
+        $accessToken = $this->createStub(AccessTokenInterface::class);
 
         $identity = new User();
         $identity->id = 'fbid';
         $identity->email = 'fb@fb.test';
 
         $middleware->expects($this->once())
-            ->method('_getSocialIdentity')
+            ->method('getSocialIdentity')
             ->willReturn(['identity' => $identity, 'access_token' => $accessToken]);
 
         EventManager::instance()->on(

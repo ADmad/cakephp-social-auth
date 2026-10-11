@@ -42,7 +42,6 @@ class SocialAuthPlugin extends BasePlugin
     {
         $routes->scope(
             '/social-auth',
-            ['plugin' => 'ADmad/SocialAuth', 'controller' => 'Auth'],
             function (RouteBuilder $routes): void {
                 $routes->connect(
                     '/login/{provider}',
@@ -59,6 +58,7 @@ class SocialAuthPlugin extends BasePlugin
                     ['action' => 'callback'],
                 );
             },
+            ['plugin' => 'ADmad/SocialAuth', 'controller' => 'Auth'],
         );
     }
 }

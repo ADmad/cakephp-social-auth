@@ -18,8 +18,7 @@ use Cake\ORM\Table;
  * @method array<\ADmad\SocialAuth\Model\Entity\SocialProfile> newEntities(array $data, array $options = [])
  * @method \ADmad\SocialAuth\Model\Entity\SocialProfile get(mixed $primaryKey, array|string $finder = 'all', \Psr\SimpleCache\CacheInterface|string|null $cache = null, \Closure|string|null $cacheKey = null, mixed ...$args)
  * @method \ADmad\SocialAuth\Model\Entity\SocialProfile findOrCreate(\Cake\ORM\Query\SelectQuery|callable|array $search, callable|array|null $callback = null, array $options = [])
- * @extends \Cake\ORM\Table<array{Timestamp: \Cake\ORM\Behavior\TimestampBehavior}>
- * @mixin \Cake\ORM\Behavior\TimestampBehavior
+ * @extends \Cake\ORM\Table<array{Timestamp: \Cake\ORM\Behavior\TimestampBehavior}, \ADmad\SocialAuth\Model\Entity\SocialProfile>
  */
 class SocialProfilesTable extends Table
 {
