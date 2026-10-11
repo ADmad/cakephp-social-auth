@@ -8,7 +8,7 @@ return [
             'id' => ['type' => 'integer', 'length' => null, 'unsigned' => false, 'null' => false, 'default' => null, 'autoIncrement' => true],
             'user_id' => ['type' => 'integer', 'length' => null, 'unsigned' => false, 'null' => true, 'default' => null, 'autoIncrement' => null],
             'provider' => ['type' => 'string', 'length' => 255, 'null' => false, 'default' => null],
-            'access_token' => ['type' => 'varbinary', 'length' => null, 'null' => false, 'default' => null],
+            'access_token' => ['type' => 'binary', 'length' => null, 'null' => false, 'default' => null],
             'identifier' => ['type' => 'string', 'length' => 255, 'null' => false, 'default' => null],
             'username' => ['type' => 'string', 'length' => 255, 'null' => true, 'default' => null],
             'first_name' => ['type' => 'string', 'length' => 255, 'null' => true, 'default' => null],
